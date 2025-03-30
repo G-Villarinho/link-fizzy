@@ -1,0 +1,49 @@
+package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/g-villarinho/link-fizz-api/pkgs/di"
+)
+
+func main() {
+	i := di.NewInjector()
+	db := initDeps(i)
+
+	mux := setupRoutes(i)
+	server := &http.Server{
+		Addr:    ":8080",
+		Handler: mux,
+	}
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		log.Println("\n" +
+			"🔗 Link Fizz API\n" +
+			"🚀 Server started successfully!\n" +
+			"📌 Address: http://localhost:8080\n" +
+			"⏳ Ready to shorten URLs at " + time.Now().Format("02/01/2006 15:04:05"))
+
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("❌ Failed to start server: %v", err)
+		}
+	}()
+
+	<-stop
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Printf("⚠️ Error during server shutdown: %v", err)
+	}
+	db.Close()
+	log.Println("✅ Server and database connection shut down properly.")
+}
