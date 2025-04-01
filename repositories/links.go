@@ -13,6 +13,7 @@ type LinkRepository interface {
 	CreateLink(ctx context.Context, link models.Link) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetLinkByID(ctx context.Context, ID string) (*models.Link, error)
+	GetAllShortCodes(ctx context.Context) ([]string, error)
 }
 
 type linkRepository struct {
@@ -74,6 +75,10 @@ func (l *linkRepository) GetLinkByID(ctx context.Context, ID string) (*models.Li
 		PrepareContext(ctx, "SELECT id, original_url, short_code, created_at, updated_at FROM links WHERE id = ?")
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
 		return nil, err
 	}
 	defer statement.Close()
@@ -88,4 +93,29 @@ func (l *linkRepository) GetLinkByID(ctx context.Context, ID string) (*models.Li
 	}
 
 	return &link, nil
+}
+
+func (l *linkRepository) GetAllShortCodes(ctx context.Context) ([]string, error) {
+	statement, err := l.db.PrepareContext(ctx, "SELECT short_code FROM links")
+	if err != nil {
+		return nil, err
+	}
+	defer statement.Close()
+
+	rows, err := statement.QueryContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var shortCodes []string
+	for rows.Next() {
+		var shortCode string
+		if err := rows.Scan(&shortCode); err != nil {
+			return nil, err
+		}
+		shortCodes = append(shortCodes, shortCode)
+	}
+
+	return shortCodes, nil
 }

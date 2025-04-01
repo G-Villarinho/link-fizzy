@@ -47,6 +47,7 @@ func setupRoutes(i *di.Injector) *http.ServeMux {
 
 	mux.HandleFunc("POST /links", linkHandler.CreateLink)
 	mux.HandleFunc("GET /{shortCode}", linkHandler.RedirectLink)
+	mux.HandleFunc("GET /links", linkHandler.GetShortURLs)
 
 	return mux
 }

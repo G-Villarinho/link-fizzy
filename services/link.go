@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/g-villarinho/link-fizz-api/config"
 	"github.com/g-villarinho/link-fizz-api/models"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
 	"github.com/g-villarinho/link-fizz-api/repositories"
@@ -16,6 +17,7 @@ const shortCodeLength = 8
 type LinkService interface {
 	CreateLink(ctx context.Context, originalURL string) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
+	GetShortURLs(ctx context.Context) ([]string, error)
 }
 
 type linkService struct {
@@ -78,4 +80,24 @@ func (l *linkService) GetOriginalURLByShortCode(ctx context.Context, shortCode s
 	}
 
 	return originalUrl, nil
+}
+
+func (l *linkService) GetShortURLs(ctx context.Context) ([]string, error) {
+	shortCodes, err := l.lr.GetAllShortCodes(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get all short codes: %w", err)
+	}
+
+	if len(shortCodes) == 0 {
+		return []string{}, nil
+	}
+
+	shortUrls := make([]string, len(shortCodes))
+	apiURL := config.Env.APIURL
+
+	for i, shortCode := range shortCodes {
+		shortUrls[i] = fmt.Sprintf("%s/%s", apiURL, shortCode)
+	}
+
+	return shortUrls, nil
 }

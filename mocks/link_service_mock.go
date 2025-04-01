@@ -125,6 +125,64 @@ func (_c *LinkServiceMock_GetOriginalURLByShortCode_Call) RunAndReturn(run func(
 	return _c
 }
 
+// GetShortURLs provides a mock function with given fields: ctx
+func (_m *LinkServiceMock) GetShortURLs(ctx context.Context) ([]string, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetShortURLs")
+	}
+
+	var r0 []string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) ([]string, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) []string); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// LinkServiceMock_GetShortURLs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetShortURLs'
+type LinkServiceMock_GetShortURLs_Call struct {
+	*mock.Call
+}
+
+// GetShortURLs is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *LinkServiceMock_Expecter) GetShortURLs(ctx interface{}) *LinkServiceMock_GetShortURLs_Call {
+	return &LinkServiceMock_GetShortURLs_Call{Call: _e.mock.On("GetShortURLs", ctx)}
+}
+
+func (_c *LinkServiceMock_GetShortURLs_Call) Run(run func(ctx context.Context)) *LinkServiceMock_GetShortURLs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *LinkServiceMock_GetShortURLs_Call) Return(_a0 []string, _a1 error) *LinkServiceMock_GetShortURLs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *LinkServiceMock_GetShortURLs_Call) RunAndReturn(run func(context.Context) ([]string, error)) *LinkServiceMock_GetShortURLs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // NewLinkServiceMock creates a new instance of LinkServiceMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewLinkServiceMock(t interface {

@@ -32,7 +32,6 @@ func TestGenerateShortCode(t *testing.T) {
 
 		assert.NoError(t, err)
 
-		// Verify that the generated short code contains only characters from the charset
 		for _, char := range shortCode {
 			assert.Contains(t, charset, string(char))
 		}

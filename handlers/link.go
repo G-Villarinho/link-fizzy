@@ -15,6 +15,7 @@ import (
 type LinkHandler interface {
 	CreateLink(w http.ResponseWriter, r *http.Request)
 	RedirectLink(w http.ResponseWriter, r *http.Request)
+	GetShortURLs(w http.ResponseWriter, r *http.Request)
 }
 
 type linkHandler struct {
@@ -95,4 +96,20 @@ func (l *linkHandler) RedirectLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, originalURL, http.StatusFound)
+}
+
+func (l *linkHandler) GetShortURLs(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		"handler", "link",
+		"method", "GetShortURLs",
+	)
+
+	shortURLs, err := l.ls.GetShortURLs(r.Context())
+	if err != nil {
+		logger.Error("get short URLs", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, shortURLs)
 }

@@ -186,3 +186,101 @@ func TestRedirectLink(t *testing.T) {
 		mockLinkService.AssertExpectations(t)
 	})
 }
+
+func TestGetShortURLs(t *testing.T) {
+	t.Run("should return 200 with list of short URLs when they exist", func(t *testing.T) {
+		mockLinkService := new(mocks.LinkServiceMock)
+		handler := &linkHandler{ls: mockLinkService}
+
+		expectedURLs := []string{
+			"https://api.example.com/abc123",
+			"https://api.example.com/def456",
+		}
+
+		mockLinkService.On("GetShortURLs", mock.Anything).Return(expectedURLs, nil)
+
+		req, err := http.NewRequest("GET", "/links", nil)
+		assert.NoError(t, err)
+		resp := httptest.NewRecorder()
+
+		handler.GetShortURLs(resp, req)
+
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+
+		var result []string
+		err = jsoniter.Unmarshal(resp.Body.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Equal(t, expectedURLs, result)
+		mockLinkService.AssertExpectations(t)
+	})
+
+	t.Run("should return 200 with empty array when no URLs exist", func(t *testing.T) {
+		mockLinkService := new(mocks.LinkServiceMock)
+		handler := &linkHandler{ls: mockLinkService}
+
+		mockLinkService.On("GetShortURLs", mock.Anything).Return([]string{}, nil)
+
+		req, err := http.NewRequest("GET", "/links", nil)
+		assert.NoError(t, err)
+		resp := httptest.NewRecorder()
+
+		handler.GetShortURLs(resp, req)
+
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+
+		var result []string
+		err = jsoniter.Unmarshal(resp.Body.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Empty(t, result)
+		mockLinkService.AssertExpectations(t)
+	})
+
+	t.Run("should return 500 when service returns an error", func(t *testing.T) {
+		mockLinkService := new(mocks.LinkServiceMock)
+		handler := &linkHandler{ls: mockLinkService}
+
+		mockLinkService.On("GetShortURLs", mock.Anything).Return(nil, errors.New("service error"))
+
+		req, err := http.NewRequest("GET", "/links", nil)
+		assert.NoError(t, err)
+		resp := httptest.NewRecorder()
+
+		handler.GetShortURLs(resp, req)
+
+		assert.Equal(t, http.StatusInternalServerError, resp.Code)
+		mockLinkService.AssertExpectations(t)
+	})
+
+	t.Run("should return application/json Content-Type for successful responses", func(t *testing.T) {
+		mockLinkService := new(mocks.LinkServiceMock)
+		handler := &linkHandler{ls: mockLinkService}
+
+		mockLinkService.On("GetShortURLs", mock.Anything).Return([]string{"https://api.example.com/test"}, nil)
+
+		req, err := http.NewRequest("GET", "/links", nil)
+		assert.NoError(t, err)
+		resp := httptest.NewRecorder()
+
+		handler.GetShortURLs(resp, req)
+
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+	})
+
+	t.Run("should return empty body for 500 error responses", func(t *testing.T) {
+		mockLinkService := new(mocks.LinkServiceMock)
+		handler := &linkHandler{ls: mockLinkService}
+
+		mockLinkService.On("GetShortURLs", mock.Anything).Return(nil, errors.New("service error"))
+
+		req, err := http.NewRequest("GET", "/links", nil)
+		assert.NoError(t, err)
+		resp := httptest.NewRecorder()
+
+		handler.GetShortURLs(resp, req)
+
+		assert.Equal(t, http.StatusInternalServerError, resp.Code)
+		assert.Empty(t, resp.Body.String())
+	})
+}
