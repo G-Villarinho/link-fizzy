@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,16 +10,19 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/g-villarinho/link-fizz-api/config"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
 )
 
 func main() {
 	i := di.NewInjector()
+
+	config.LoadEnv()
 	db := initDeps(i)
 
 	mux := setupRoutes(i)
 	server := &http.Server{
-		Addr:    ":8080",
+		Addr:    fmt.Sprintf(":%s", config.Env.APIPort),
 		Handler: mux,
 	}
 
@@ -29,7 +33,7 @@ func main() {
 		log.Println("\n" +
 			"🔗 Link Fizz API\n" +
 			"🚀 Server started successfully!\n" +
-			"📌 Address: http://localhost:8080\n" +
+			"📦 Listening on port " + config.Env.APIPort + "\n" +
 			"⏳ Ready to shorten URLs at " + time.Now().Format("02/01/2006 15:04:05"))
 
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -45,5 +49,5 @@ func main() {
 		log.Printf("⚠️ Error during server shutdown: %v", err)
 	}
 	db.Close()
-	log.Println("✅ Server and database connection shut down properly.")
+	log.Println("\n✅ Server and database connection shut down properly.")
 }
