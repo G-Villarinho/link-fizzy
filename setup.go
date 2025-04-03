@@ -7,8 +7,10 @@ import (
 
 	"github.com/g-villarinho/link-fizz-api/databases"
 	"github.com/g-villarinho/link-fizz-api/handlers"
+	"github.com/g-villarinho/link-fizz-api/handlers/middlewares"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
 	"github.com/g-villarinho/link-fizz-api/pkgs/ecdsa"
+	"github.com/g-villarinho/link-fizz-api/pkgs/requestcontext"
 	"github.com/g-villarinho/link-fizz-api/repositories"
 	"github.com/g-villarinho/link-fizz-api/services"
 )
@@ -25,8 +27,12 @@ func initDeps(i *di.Injector) *sql.DB {
 		return db, nil
 	})
 
+	// Middlewares
+	di.Provide(i, middlewares.NewAuthMiddleware)
+
 	// Config
 	di.Provide(i, ecdsa.NewEcdsaKeyPair)
+	di.Provide(i, requestcontext.NewRequestContext)
 
 	// Handlers
 	di.Provide(i, handlers.NewLinkHandler)
@@ -78,7 +84,14 @@ func setupUserRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 		log.Fatal("failed to invoke user handler:", err)
 	}
 
+	authMiddleware, err := di.Invoke[middlewares.AuthMiddleware](i)
+	if err != nil {
+		log.Fatal("failed to invoke auth middleware:", err)
+	}
+
 	mux.HandleFunc("POST /users", userHandler.CreateUser)
+
+	mux.Handle("GET /me", authMiddleware.Authenticate(http.HandlerFunc(userHandler.GetProfile)))
 
 	return mux
 }

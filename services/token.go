@@ -13,6 +13,7 @@ import (
 
 type TokenService interface {
 	GenerateToken(ctx context.Context, userID string) (string, error)
+	ValidateToken(ctx context.Context, tokenString string) (string, error)
 }
 
 type tokenService struct {
@@ -52,4 +53,32 @@ func (t *tokenService) GenerateToken(ctx context.Context, userID string) (string
 	}
 
 	return signedToken, nil
+}
+
+func (t *tokenService) ValidateToken(ctx context.Context, tokenString string) (string, error) {
+	publicKey, err := t.kp.ParseECDSAPublicKey(config.Env.Key.PublicKey)
+	if err != nil {
+		return "", fmt.Errorf("parse public key: %w", err)
+	}
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodECDSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return publicKey, nil
+	})
+
+	if err != nil {
+		return "", fmt.Errorf("parse token: %w", err)
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, ok := claims["sub"].(string)
+		if !ok {
+			return "", fmt.Errorf("invalid token claims")
+		}
+		return userID, nil
+	}
+
+	return "", fmt.Errorf("invalid token")
 }

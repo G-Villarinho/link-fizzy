@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/g-villarinho/link-fizz-api/models"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
+	"github.com/g-villarinho/link-fizz-api/pkgs/requestcontext"
 	"github.com/g-villarinho/link-fizz-api/responses"
 	"github.com/g-villarinho/link-fizz-api/services"
 	jsoniter "github.com/json-iterator/go"
@@ -13,22 +15,30 @@ import (
 
 type UserHandler interface {
 	CreateUser(w http.ResponseWriter, r *http.Request)
+	GetProfile(w http.ResponseWriter, r *http.Request)
 }
 
 type userHandler struct {
 	i  *di.Injector
+	rc requestcontext.RequestContext
 	ur services.UserService
 }
 
 func NewUserHandler(i *di.Injector) (UserHandler, error) {
-	ur, err := di.Invoke[services.UserService](i)
+	userService, err := di.Invoke[services.UserService](i)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invoke services.UserService: %w", err)
+	}
+
+	requestContext, err := di.Invoke[requestcontext.RequestContext](i)
+	if err != nil {
+		return nil, fmt.Errorf("invoke requestcontext.RequestContext: %w", err)
 	}
 
 	return &userHandler{
 		i:  i,
-		ur: ur,
+		rc: requestContext,
+		ur: userService,
 	}, nil
 }
 
@@ -59,4 +69,27 @@ func (u *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responses.NoContent(w, http.StatusCreated)
+}
+
+func (u *userHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		"handler", "user",
+		"method", "GetProfile",
+	)
+
+	userID, found := u.rc.GetUserID(r.Context())
+	if !found {
+		logger.Error("user ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	resp, err := u.ur.GetUserByID(r.Context(), userID)
+	if err != nil {
+		logger.Error("get user by ID", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, resp)
 }
