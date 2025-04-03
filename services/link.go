@@ -17,7 +17,7 @@ const shortCodeLength = 8
 type LinkService interface {
 	CreateLink(ctx context.Context, userID, originalURL string) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
-	GetShortURLs(ctx context.Context) ([]string, error)
+	GetUsersShortURLs(ctx context.Context, userID string) ([]string, error)
 }
 
 type linkService struct {
@@ -59,6 +59,7 @@ func (l *linkService) CreateLink(ctx context.Context, userID, originalURL string
 		ID:          id.String(),
 		OriginalURL: originalURL,
 		ShortCode:   shortCode,
+		UserID:      userID,
 		CreatedAt:   time.Now().UTC(),
 	}
 
@@ -82,8 +83,8 @@ func (l *linkService) GetOriginalURLByShortCode(ctx context.Context, shortCode s
 	return originalUrl, nil
 }
 
-func (l *linkService) GetShortURLs(ctx context.Context) ([]string, error) {
-	shortCodes, err := l.lr.GetAllShortCodes(ctx)
+func (l *linkService) GetUsersShortURLs(ctx context.Context, userID string) ([]string, error) {
+	shortCodes, err := l.lr.GetAllShortCodesByUserID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get all short codes: %w", err)
 	}

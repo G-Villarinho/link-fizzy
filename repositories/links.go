@@ -13,7 +13,7 @@ type LinkRepository interface {
 	CreateLink(ctx context.Context, link models.Link) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetLinkByID(ctx context.Context, ID string) (*models.Link, error)
-	GetAllShortCodes(ctx context.Context) ([]string, error)
+	GetAllShortCodesByUserID(ctx context.Context, userID string) ([]string, error)
 }
 
 type linkRepository struct {
@@ -82,10 +82,16 @@ func (l *linkRepository) scanLink(row *sql.Row) (*models.Link, error) {
 	return &link, nil
 }
 
-func (l *linkRepository) GetAllShortCodes(ctx context.Context) ([]string, error) {
-	rows, err := l.db.QueryContext(ctx, "SELECT short_code FROM links")
+func (l *linkRepository) GetAllShortCodesByUserID(ctx context.Context, userID string) ([]string, error) {
+	statement, err := l.db.PrepareContext(ctx, "SELECT short_code FROM links WHERE user_id = ?")
 	if err != nil {
-		return nil, fmt.Errorf("query short_codes: %w", err)
+		return nil, fmt.Errorf("prepare select: %w", err)
+	}
+	defer statement.Close()
+
+	rows, err := statement.QueryContext(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("query select: %w", err)
 	}
 	defer rows.Close()
 
@@ -93,13 +99,9 @@ func (l *linkRepository) GetAllShortCodes(ctx context.Context) ([]string, error)
 	for rows.Next() {
 		var shortCode string
 		if err := rows.Scan(&shortCode); err != nil {
-			return nil, fmt.Errorf("scan short_code: %w", err)
+			return nil, fmt.Errorf("scan short code: %w", err)
 		}
 		shortCodes = append(shortCodes, shortCode)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows iteration: %w", err)
 	}
 
 	return shortCodes, nil

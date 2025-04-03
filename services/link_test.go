@@ -160,7 +160,8 @@ func TestGetShortURLs(t *testing.T) {
 
 		mockRepo.On("GetAllShortCodes", ctx).Return(expectedShortCodes, nil)
 
-		result, err := service.GetShortURLs(ctx)
+		userID := uuid.New().String()
+		result, err := service.GetUsersShortURLs(ctx, userID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, expectedURLs, result)
@@ -176,7 +177,8 @@ func TestGetShortURLs(t *testing.T) {
 
 		mockRepo.On("GetAllShortCodes", ctx).Return(emptyShortCodes, nil)
 
-		result, err := service.GetShortURLs(ctx)
+		userID := uuid.New().String()
+		result, err := service.GetUsersShortURLs(ctx, userID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{}, result)
@@ -193,7 +195,8 @@ func TestGetShortURLs(t *testing.T) {
 
 		mockRepo.On("GetAllShortCodes", ctx).Return(nil, expectedError)
 
-		result, err := service.GetShortURLs(ctx)
+		userID := uuid.New().String()
+		result, err := service.GetUsersShortURLs(ctx, userID)
 
 		assert.Error(t, err)
 		assert.Nil(t, result)
@@ -215,7 +218,8 @@ func TestGetShortURLs(t *testing.T) {
 
 		mockRepo.On("GetAllShortCodes", ctx).Return(shortCodes, nil)
 
-		result, err := service.GetShortURLs(ctx)
+		userID := uuid.New().String()
+		result, err := service.GetUsersShortURLs(ctx, userID)
 
 		assert.NoError(t, err)
 		assert.Equal(t, []string{expectedURL}, result)

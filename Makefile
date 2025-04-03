@@ -1,6 +1,6 @@
 .PHONY: run
 run:
-	go run main.go setup.go
+	@go run main.go setup.go
 
 .PHONY: generate-key
 generate-key: ## Generate private and public key
@@ -14,3 +14,7 @@ docker-up: ## Start MySQL container
 .PHONY: docker-down
 docker-down: ## Stop MySQL container
 	@docker-compose down
+
+.PHONY: mock
+mock: ## Stop MySQL container
+	@mockery

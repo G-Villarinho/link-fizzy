@@ -69,29 +69,29 @@ func (_c *LinkRepositoryMock_CreateLink_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
-// GetAllShortCodes provides a mock function with given fields: ctx
-func (_m *LinkRepositoryMock) GetAllShortCodes(ctx context.Context) ([]string, error) {
-	ret := _m.Called(ctx)
+// GetAllShortCodesByUserID provides a mock function with given fields: ctx, userID
+func (_m *LinkRepositoryMock) GetAllShortCodesByUserID(ctx context.Context, userID string) ([]string, error) {
+	ret := _m.Called(ctx, userID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetAllShortCodes")
+		panic("no return value specified for GetAllShortCodesByUserID")
 	}
 
 	var r0 []string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]string, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]string, error)); ok {
+		return rf(ctx, userID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []string); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []string); ok {
+		r0 = rf(ctx, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -99,30 +99,31 @@ func (_m *LinkRepositoryMock) GetAllShortCodes(ctx context.Context) ([]string, e
 	return r0, r1
 }
 
-// LinkRepositoryMock_GetAllShortCodes_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllShortCodes'
-type LinkRepositoryMock_GetAllShortCodes_Call struct {
+// LinkRepositoryMock_GetAllShortCodesByUserID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAllShortCodesByUserID'
+type LinkRepositoryMock_GetAllShortCodesByUserID_Call struct {
 	*mock.Call
 }
 
-// GetAllShortCodes is a helper method to define mock.On call
+// GetAllShortCodesByUserID is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *LinkRepositoryMock_Expecter) GetAllShortCodes(ctx interface{}) *LinkRepositoryMock_GetAllShortCodes_Call {
-	return &LinkRepositoryMock_GetAllShortCodes_Call{Call: _e.mock.On("GetAllShortCodes", ctx)}
+//   - userID string
+func (_e *LinkRepositoryMock_Expecter) GetAllShortCodesByUserID(ctx interface{}, userID interface{}) *LinkRepositoryMock_GetAllShortCodesByUserID_Call {
+	return &LinkRepositoryMock_GetAllShortCodesByUserID_Call{Call: _e.mock.On("GetAllShortCodesByUserID", ctx, userID)}
 }
 
-func (_c *LinkRepositoryMock_GetAllShortCodes_Call) Run(run func(ctx context.Context)) *LinkRepositoryMock_GetAllShortCodes_Call {
+func (_c *LinkRepositoryMock_GetAllShortCodesByUserID_Call) Run(run func(ctx context.Context, userID string)) *LinkRepositoryMock_GetAllShortCodesByUserID_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *LinkRepositoryMock_GetAllShortCodes_Call) Return(_a0 []string, _a1 error) *LinkRepositoryMock_GetAllShortCodes_Call {
+func (_c *LinkRepositoryMock_GetAllShortCodesByUserID_Call) Return(_a0 []string, _a1 error) *LinkRepositoryMock_GetAllShortCodesByUserID_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *LinkRepositoryMock_GetAllShortCodes_Call) RunAndReturn(run func(context.Context) ([]string, error)) *LinkRepositoryMock_GetAllShortCodes_Call {
+func (_c *LinkRepositoryMock_GetAllShortCodesByUserID_Call) RunAndReturn(run func(context.Context, string) ([]string, error)) *LinkRepositoryMock_GetAllShortCodesByUserID_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -126,29 +126,29 @@ func (_c *LinkServiceMock_GetOriginalURLByShortCode_Call) RunAndReturn(run func(
 	return _c
 }
 
-// GetShortURLs provides a mock function with given fields: ctx
-func (_m *LinkServiceMock) GetShortURLs(ctx context.Context) ([]string, error) {
-	ret := _m.Called(ctx)
+// GetUsersShortURLs provides a mock function with given fields: ctx, userID
+func (_m *LinkServiceMock) GetUsersShortURLs(ctx context.Context, userID string) ([]string, error) {
+	ret := _m.Called(ctx, userID)
 
 	if len(ret) == 0 {
-		panic("no return value specified for GetShortURLs")
+		panic("no return value specified for GetUsersShortURLs")
 	}
 
 	var r0 []string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]string, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]string, error)); ok {
+		return rf(ctx, userID)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []string); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, string) []string); ok {
+		r0 = rf(ctx, userID)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userID)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -156,30 +156,31 @@ func (_m *LinkServiceMock) GetShortURLs(ctx context.Context) ([]string, error) {
 	return r0, r1
 }
 
-// LinkServiceMock_GetShortURLs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetShortURLs'
-type LinkServiceMock_GetShortURLs_Call struct {
+// LinkServiceMock_GetUsersShortURLs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUsersShortURLs'
+type LinkServiceMock_GetUsersShortURLs_Call struct {
 	*mock.Call
 }
 
-// GetShortURLs is a helper method to define mock.On call
+// GetUsersShortURLs is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *LinkServiceMock_Expecter) GetShortURLs(ctx interface{}) *LinkServiceMock_GetShortURLs_Call {
-	return &LinkServiceMock_GetShortURLs_Call{Call: _e.mock.On("GetShortURLs", ctx)}
+//   - userID string
+func (_e *LinkServiceMock_Expecter) GetUsersShortURLs(ctx interface{}, userID interface{}) *LinkServiceMock_GetUsersShortURLs_Call {
+	return &LinkServiceMock_GetUsersShortURLs_Call{Call: _e.mock.On("GetUsersShortURLs", ctx, userID)}
 }
 
-func (_c *LinkServiceMock_GetShortURLs_Call) Run(run func(ctx context.Context)) *LinkServiceMock_GetShortURLs_Call {
+func (_c *LinkServiceMock_GetUsersShortURLs_Call) Run(run func(ctx context.Context, userID string)) *LinkServiceMock_GetUsersShortURLs_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(string))
 	})
 	return _c
 }
 
-func (_c *LinkServiceMock_GetShortURLs_Call) Return(_a0 []string, _a1 error) *LinkServiceMock_GetShortURLs_Call {
+func (_c *LinkServiceMock_GetUsersShortURLs_Call) Return(_a0 []string, _a1 error) *LinkServiceMock_GetUsersShortURLs_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *LinkServiceMock_GetShortURLs_Call) RunAndReturn(run func(context.Context) ([]string, error)) *LinkServiceMock_GetShortURLs_Call {
+func (_c *LinkServiceMock_GetUsersShortURLs_Call) RunAndReturn(run func(context.Context, string) ([]string, error)) *LinkServiceMock_GetUsersShortURLs_Call {
 	_c.Call.Return(run)
 	return _c
 }

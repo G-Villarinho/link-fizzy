@@ -120,7 +120,14 @@ func (l *linkHandler) GetShortURLs(w http.ResponseWriter, r *http.Request) {
 		"method", "GetShortURLs",
 	)
 
-	shortURLs, err := l.ls.GetShortURLs(r.Context())
+	userID, found := l.rc.GetUserID(r.Context())
+	if !found {
+		logger.Error("user ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	shortURLs, err := l.ls.GetUsersShortURLs(r.Context(), userID)
 	if err != nil {
 		logger.Error("get short URLs", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
