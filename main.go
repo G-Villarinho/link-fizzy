@@ -17,7 +17,10 @@ import (
 func main() {
 	i := di.NewInjector()
 
-	config.LoadEnv()
+	if err := config.LoadEnv(); err != nil {
+		log.Fatalf("❌ Failed to load environment variables: %v", err)
+	}
+
 	db := initDeps(i)
 
 	mux := setupRoutes(i)

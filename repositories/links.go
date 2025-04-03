@@ -34,77 +34,58 @@ func NewLinkRepository(i *di.Injector) (LinkRepository, error) {
 }
 
 func (l *linkRepository) CreateLink(ctx context.Context, link models.Link) error {
-	statement, err := l.db.
-		PrepareContext(ctx, "INSERT INTO links (id, original_url, short_code, created_at) VALUES (?, ?, ?, ?)")
-
+	statement, err := l.db.PrepareContext(ctx, "INSERT INTO links (id, original_url, short_code, created_at) VALUES (?, ?, ?, ?)")
 	if err != nil {
-		return err
+		return fmt.Errorf("prepare insert: %w", err)
 	}
 	defer statement.Close()
 
 	_, err = statement.ExecContext(ctx, link.ID, link.OriginalURL, link.ShortCode, link.CreatedAt)
 	if err != nil {
-		return err
+		return fmt.Errorf("execute insert: %w", err)
 	}
 
 	return nil
 }
 
 func (l *linkRepository) GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error) {
-	statement, err := l.db.PrepareContext(ctx, "SELECT original_url FROM links WHERE short_code = ?")
-	if err != nil {
-		return "", err
-	}
-	defer statement.Close()
-
 	var originalURL string
-	err = statement.QueryRowContext(ctx, shortCode).Scan(&originalURL)
+	err := l.db.QueryRowContext(ctx, "SELECT original_url FROM links WHERE short_code = ?", shortCode).Scan(&originalURL)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "", nil
 		}
-
-		return "", err
+		return "", fmt.Errorf("query original_url: %w", err)
 	}
-
 	return originalURL, nil
 }
 
 func (l *linkRepository) GetLinkByID(ctx context.Context, ID string) (*models.Link, error) {
-	statement, err := l.db.
-		PrepareContext(ctx, "SELECT id, original_url, short_code, created_at, updated_at FROM links WHERE id = ?")
+	statement, err := l.db.PrepareContext(ctx, "SELECT id, original_url, short_code, created_at, updated_at FROM links WHERE id = ?")
+	if err != nil {
+		return nil, fmt.Errorf("prepare select: %w", err)
+	}
+	defer statement.Close()
 
+	return l.scanLink(statement.QueryRowContext(ctx, ID))
+}
+
+func (l *linkRepository) scanLink(row *sql.Row) (*models.Link, error) {
+	var link models.Link
+	err := row.Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.CreatedAt, &link.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-
-		return nil, err
+		return nil, fmt.Errorf("scan link: %w", err)
 	}
-	defer statement.Close()
-
-	var link models.Link
-	err = statement.
-		QueryRowContext(ctx, ID).
-		Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.CreatedAt, &link.UpdatedAt)
-
-	if err != nil {
-		return nil, err
-	}
-
 	return &link, nil
 }
 
 func (l *linkRepository) GetAllShortCodes(ctx context.Context) ([]string, error) {
-	statement, err := l.db.PrepareContext(ctx, "SELECT short_code FROM links")
+	rows, err := l.db.QueryContext(ctx, "SELECT short_code FROM links")
 	if err != nil {
-		return nil, err
-	}
-	defer statement.Close()
-
-	rows, err := statement.QueryContext(ctx)
-	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query short_codes: %w", err)
 	}
 	defer rows.Close()
 
@@ -112,9 +93,13 @@ func (l *linkRepository) GetAllShortCodes(ctx context.Context) ([]string, error)
 	for rows.Next() {
 		var shortCode string
 		if err := rows.Scan(&shortCode); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan short_code: %w", err)
 		}
 		shortCodes = append(shortCodes, shortCode)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration: %w", err)
 	}
 
 	return shortCodes, nil
