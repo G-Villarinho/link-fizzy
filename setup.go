@@ -54,14 +54,14 @@ func initDeps(i *di.Injector) *sql.DB {
 	return db
 }
 
-func setupRoutes(i *di.Injector) *http.ServeMux {
+func setupRoutes(i *di.Injector) http.Handler {
 	mux := http.NewServeMux()
 
 	setupLinkRoutes(mux, i)
 	setupUserRoutes(mux, i)
 	setupLoginRoutes(mux, i)
 
-	return mux
+	return applyMiddlewares(mux)
 }
 
 func setupLinkRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
@@ -109,4 +109,8 @@ func setupLoginRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 	mux.HandleFunc("POST /login", loginHandler.Login)
 
 	return mux
+}
+
+func applyMiddlewares(handler http.Handler) http.Handler {
+	return middlewares.CorsMiddleware(handler)
 }
