@@ -46,14 +46,7 @@ func (u *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	user, err := payload.ToUser()
-	if err != nil {
-		logger.Error("convert payload to user", slog.String("error", err.Error()))
-		responses.NoContent(w, http.StatusBadRequest)
-		return
-	}
-
-	if err := u.ur.CreateUser(r.Context(), user); err != nil {
+	if err := u.ur.CreateUser(r.Context(), payload.Name, payload.Email, payload.Password); err != nil {
 		if err == models.ErrUserAlreadyExists {
 			logger.Error("user already exists", slog.String("error", err.Error()))
 			responses.NoContent(w, http.StatusConflict)

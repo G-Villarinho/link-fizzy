@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 var (
@@ -34,18 +32,14 @@ type UserResponse struct {
 	Email string `json:"email"`
 }
 
-func (p *CreateUserPayload) ToUser() (*User, error) {
-	id, err := uuid.NewRandom()
-	if err != nil {
-		return nil, fmt.Errorf("generate UUID: %w", err)
-	}
-
+func NewUser(id, name, email, passwordHash string, createdAt time.Time) *User {
 	return &User{
-		ID:        id.String(),
-		Name:      p.Name,
-		Email:     p.Email,
-		CreatedAt: time.Now().UTC(),
-	}, nil
+		ID:           id,
+		Name:         name,
+		Email:        email,
+		PasswordHash: passwordHash,
+		CreatedAt:    createdAt,
+	}
 }
 
 func (u *User) ToUseResponse() *UserResponse {

@@ -3,14 +3,16 @@ package services
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/g-villarinho/link-fizz-api/models"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
 	"github.com/g-villarinho/link-fizz-api/repositories"
+	"github.com/google/uuid"
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, user *models.User) error
+	CreateUser(ctx context.Context, name, email, password string) error
 	GetUserByID(ctx context.Context, ID string) (*models.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 }
@@ -39,8 +41,8 @@ func NewUserService(i *di.Injector) (UserService, error) {
 	}, nil
 }
 
-func (u *userService) CreateUser(ctx context.Context, user *models.User) error {
-	userFromEmail, err := u.ur.GetUserByEmail(ctx, user.Email)
+func (u *userService) CreateUser(ctx context.Context, name, email, password string) error {
+	userFromEmail, err := u.ur.GetUserByEmail(ctx, email)
 	if err != nil {
 		return fmt.Errorf("get user by email: %w", err)
 	}
@@ -49,12 +51,17 @@ func (u *userService) CreateUser(ctx context.Context, user *models.User) error {
 		return models.ErrUserAlreadyExists
 	}
 
-	passwordHash, err := u.ss.HashPassword(ctx, user.PasswordHash)
+	passwordHash, err := u.ss.HashPassword(ctx, password)
 	if err != nil {
 		return fmt.Errorf("hash password: %w", err)
 	}
 
-	user.PasswordHash = passwordHash
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return fmt.Errorf("generate UUID: %w", err)
+	}
+
+	user := models.NewUser(id.String(), name, email, passwordHash, time.Now().UTC())
 
 	if err := u.ur.CreateUser(ctx, user); err != nil {
 		return fmt.Errorf("create user: %w", err)
