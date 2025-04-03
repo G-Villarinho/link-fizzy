@@ -65,13 +65,17 @@ func setupRoutes(i *di.Injector) *http.ServeMux {
 }
 
 func setupLinkRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
-
 	linkHandler, err := di.Invoke[handlers.LinkHandler](i)
 	if err != nil {
 		log.Fatal("failed to invoke link handler:", err)
 	}
 
-	mux.HandleFunc("POST /links", linkHandler.CreateLink)
+	authMiddleware, err := di.Invoke[middlewares.AuthMiddleware](i)
+	if err != nil {
+		log.Fatal("failed to invoke auth middleware:", err)
+	}
+
+	mux.Handle("POST /links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.CreateLink)))
 	mux.HandleFunc("GET /{shortCode}", linkHandler.RedirectLink)
 	mux.HandleFunc("GET /links", linkHandler.GetShortURLs)
 

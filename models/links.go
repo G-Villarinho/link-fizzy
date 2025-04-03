@@ -12,11 +12,12 @@ var (
 )
 
 type Link struct {
-	ID          string       `json:"id"`
-	OriginalURL string       `json:"original_url"`
-	ShortCode   string       `json:"short_code"`
-	CreatedAt   time.Time    `json:"created_at"`
-	UpdatedAt   sql.NullTime `json:"updated_at"`
+	ID          string
+	OriginalURL string
+	ShortCode   string
+	UserID      string
+	CreatedAt   time.Time
+	UpdatedAt   sql.NullTime
 }
 
 type LinkPayload struct {

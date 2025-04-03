@@ -15,7 +15,7 @@ import (
 const shortCodeLength = 8
 
 type LinkService interface {
-	CreateLink(ctx context.Context, originalURL string) error
+	CreateLink(ctx context.Context, userID, originalURL string) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetShortURLs(ctx context.Context) ([]string, error)
 }
@@ -44,7 +44,7 @@ func NewLinkService(i *di.Injector) (LinkService, error) {
 	}, nil
 }
 
-func (l *linkService) CreateLink(ctx context.Context, originalURL string) error {
+func (l *linkService) CreateLink(ctx context.Context, userID, originalURL string) error {
 	shortCode, err := l.us.GenerateShortCode(shortCodeLength)
 	if err != nil {
 		return fmt.Errorf("generate short code: %w", err)

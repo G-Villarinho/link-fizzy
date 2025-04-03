@@ -1,12 +1,20 @@
 package models
 
+import "time"
+
 type Environment struct {
-	APIPort string
-	APIURL  string
-	Key     Key
+	APIPort        string
+	APIURL         string
+	DBUser         string
+	DBPassword     string
+	DBHost         string
+	DBPort         string
+	DBName         string
+	RequestTimeout time.Duration
+	Key            Key
 }
 
 type Key struct {
-	PrivateKey string `env:"KEY_ECDSA_PRIVATE"`
-	PublicKey  string `env:"KEY_ECDSA_PUBLIC"`
+	PrivateKey string
+	PublicKey  string
 }

@@ -55,6 +55,40 @@ func (_c *LinkHandlerMock_CreateLink_Call) RunAndReturn(run func(http.ResponseWr
 	return _c
 }
 
+// GetShortURLs provides a mock function with given fields: w, r
+func (_m *LinkHandlerMock) GetShortURLs(w http.ResponseWriter, r *http.Request) {
+	_m.Called(w, r)
+}
+
+// LinkHandlerMock_GetShortURLs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetShortURLs'
+type LinkHandlerMock_GetShortURLs_Call struct {
+	*mock.Call
+}
+
+// GetShortURLs is a helper method to define mock.On call
+//   - w http.ResponseWriter
+//   - r *http.Request
+func (_e *LinkHandlerMock_Expecter) GetShortURLs(w interface{}, r interface{}) *LinkHandlerMock_GetShortURLs_Call {
+	return &LinkHandlerMock_GetShortURLs_Call{Call: _e.mock.On("GetShortURLs", w, r)}
+}
+
+func (_c *LinkHandlerMock_GetShortURLs_Call) Run(run func(w http.ResponseWriter, r *http.Request)) *LinkHandlerMock_GetShortURLs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(http.ResponseWriter), args[1].(*http.Request))
+	})
+	return _c
+}
+
+func (_c *LinkHandlerMock_GetShortURLs_Call) Return() *LinkHandlerMock_GetShortURLs_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *LinkHandlerMock_GetShortURLs_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request)) *LinkHandlerMock_GetShortURLs_Call {
+	_c.Run(run)
+	return _c
+}
+
 // RedirectLink provides a mock function with given fields: w, r
 func (_m *LinkHandlerMock) RedirectLink(w http.ResponseWriter, r *http.Request) {
 	_m.Called(w, r)

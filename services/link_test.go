@@ -8,6 +8,7 @@ import (
 	"github.com/g-villarinho/link-fizz-api/config"
 	"github.com/g-villarinho/link-fizz-api/mocks"
 	"github.com/g-villarinho/link-fizz-api/models"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -24,11 +25,12 @@ func TestCreateLink(t *testing.T) {
 
 		ctx := context.Background()
 		expectedShortCode := "abcd1234"
+		userID := uuid.New().String()
 
 		mockUtils.On("GenerateShortCode", shortCodeLength).Return(expectedShortCode, nil)
 		mockRepo.On("CreateLink", mock.Anything, mock.Anything).Return(nil)
 
-		err := service.CreateLink(ctx, "https://example.com")
+		err := service.CreateLink(ctx, userID, "https://example.com")
 
 		assert.NoError(t, err)
 		mockUtils.AssertExpectations(t)
@@ -46,8 +48,8 @@ func TestCreateLink(t *testing.T) {
 
 		ctx := context.Background()
 		mockUtils.On("GenerateShortCode", shortCodeLength).Return("", errors.New("failed to generate short code"))
-
-		err := service.CreateLink(ctx, "https://example.com")
+		userID := uuid.New().String()
+		err := service.CreateLink(ctx, userID, "https://example.com")
 
 		assert.Error(t, err)
 		assert.Equal(t, "generate short code: failed to generate short code", err.Error())
@@ -69,7 +71,8 @@ func TestCreateLink(t *testing.T) {
 		mockUtils.On("GenerateShortCode", shortCodeLength).Return(expectedShortCode, nil)
 		mockRepo.On("CreateLink", mock.Anything, mock.Anything).Return(errors.New("repository error"))
 
-		err := service.CreateLink(ctx, "https://example.com")
+		userID := uuid.New().String()
+		err := service.CreateLink(ctx, userID, "https://example.com")
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "create link: repository error")

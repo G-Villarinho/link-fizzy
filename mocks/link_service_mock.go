@@ -21,17 +21,17 @@ func (_m *LinkServiceMock) EXPECT() *LinkServiceMock_Expecter {
 	return &LinkServiceMock_Expecter{mock: &_m.Mock}
 }
 
-// CreateLink provides a mock function with given fields: ctx, originalURL
-func (_m *LinkServiceMock) CreateLink(ctx context.Context, originalURL string) error {
-	ret := _m.Called(ctx, originalURL)
+// CreateLink provides a mock function with given fields: ctx, userID, originalURL
+func (_m *LinkServiceMock) CreateLink(ctx context.Context, userID string, originalURL string) error {
+	ret := _m.Called(ctx, userID, originalURL)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateLink")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, originalURL)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, userID, originalURL)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -46,14 +46,15 @@ type LinkServiceMock_CreateLink_Call struct {
 
 // CreateLink is a helper method to define mock.On call
 //   - ctx context.Context
+//   - userID string
 //   - originalURL string
-func (_e *LinkServiceMock_Expecter) CreateLink(ctx interface{}, originalURL interface{}) *LinkServiceMock_CreateLink_Call {
-	return &LinkServiceMock_CreateLink_Call{Call: _e.mock.On("CreateLink", ctx, originalURL)}
+func (_e *LinkServiceMock_Expecter) CreateLink(ctx interface{}, userID interface{}, originalURL interface{}) *LinkServiceMock_CreateLink_Call {
+	return &LinkServiceMock_CreateLink_Call{Call: _e.mock.On("CreateLink", ctx, userID, originalURL)}
 }
 
-func (_c *LinkServiceMock_CreateLink_Call) Run(run func(ctx context.Context, originalURL string)) *LinkServiceMock_CreateLink_Call {
+func (_c *LinkServiceMock_CreateLink_Call) Run(run func(ctx context.Context, userID string, originalURL string)) *LinkServiceMock_CreateLink_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -63,7 +64,7 @@ func (_c *LinkServiceMock_CreateLink_Call) Return(_a0 error) *LinkServiceMock_Cr
 	return _c
 }
 
-func (_c *LinkServiceMock_CreateLink_Call) RunAndReturn(run func(context.Context, string) error) *LinkServiceMock_CreateLink_Call {
+func (_c *LinkServiceMock_CreateLink_Call) RunAndReturn(run func(context.Context, string, string) error) *LinkServiceMock_CreateLink_Call {
 	_c.Call.Return(run)
 	return _c
 }

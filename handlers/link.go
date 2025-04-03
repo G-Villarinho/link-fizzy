@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
 
 	"github.com/g-villarinho/link-fizz-api/models"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
+	"github.com/g-villarinho/link-fizz-api/pkgs/requestcontext"
 	"github.com/g-villarinho/link-fizz-api/responses"
 	"github.com/g-villarinho/link-fizz-api/services"
 	jsoniter "github.com/json-iterator/go"
@@ -21,17 +23,24 @@ type LinkHandler interface {
 type linkHandler struct {
 	i  *di.Injector
 	ls services.LinkService
+	rc requestcontext.RequestContext
 }
 
 func NewLinkHandler(i *di.Injector) (LinkHandler, error) {
-	ls, err := di.Invoke[services.LinkService](i)
+	linkService, err := di.Invoke[services.LinkService](i)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invoke services.LinkService: %w", err)
+	}
+
+	requestContext, err := di.Invoke[requestcontext.RequestContext](i)
+	if err != nil {
+		return nil, fmt.Errorf("invoke requestcontext.RequestContext: %w", err)
 	}
 
 	return &linkHandler{
 		i:  i,
-		ls: ls,
+		ls: linkService,
+		rc: requestContext,
 	}, nil
 }
 
@@ -55,12 +64,19 @@ func (l *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID, found := l.rc.GetUserID(r.Context())
+	if !found {
+		logger.Error("user ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
 	if _, err := url.ParseRequestURI(payload.OriginalURL); err != nil {
 		responses.NoContent(w, http.StatusBadRequest)
 		return
 	}
 
-	if err := l.ls.CreateLink(r.Context(), payload.OriginalURL); err != nil {
+	if err := l.ls.CreateLink(r.Context(), userID, payload.OriginalURL); err != nil {
 		logger.Error("create link", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
 		return

@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: link-fizz-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: link_fizz
+      MYSQL_USER: linkfizz_user
+      MYSQL_PASSWORD: linkfizz_pass
+      MYSQL_ROOT_HOST: "%" 
+      TZ: UTC               
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - link_fizz_network
+
+volumes:
+  mysql_data:
+
+networks:
+  link_fizz_network:
+    driver: bridge
