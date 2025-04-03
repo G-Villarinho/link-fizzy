@@ -34,13 +34,13 @@ func NewLinkRepository(i *di.Injector) (LinkRepository, error) {
 }
 
 func (l *linkRepository) CreateLink(ctx context.Context, link models.Link) error {
-	statement, err := l.db.PrepareContext(ctx, "INSERT INTO links (id, original_url, short_code, created_at) VALUES (?, ?, ?, ?)")
+	statement, err := l.db.PrepareContext(ctx, "INSERT INTO links (id, original_url, user_id, short_code, created_at) VALUES (?, ?, ?, ?, ?)")
 	if err != nil {
 		return fmt.Errorf("prepare insert: %w", err)
 	}
 	defer statement.Close()
 
-	_, err = statement.ExecContext(ctx, link.ID, link.OriginalURL, link.ShortCode, link.CreatedAt)
+	_, err = statement.ExecContext(ctx, link.ID, link.OriginalURL, link.UserID, link.ShortCode, link.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("execute insert: %w", err)
 	}
