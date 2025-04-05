@@ -12,7 +12,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, name, email, password string) error
+	CreateUser(ctx context.Context, name, email, password string) (string, error)
 	GetUserByID(ctx context.Context, ID string) (*models.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	UpdateUser(ctx context.Context, ID string, name, email string) error
@@ -50,33 +50,33 @@ func NewUserService(i *di.Injector) (UserService, error) {
 	}, nil
 }
 
-func (u *userService) CreateUser(ctx context.Context, name, email, password string) error {
+func (u *userService) CreateUser(ctx context.Context, name, email, password string) (string, error) {
 	userFromEmail, err := u.ur.GetUserByEmail(ctx, email)
 	if err != nil {
-		return fmt.Errorf("get user by email: %w", err)
+		return "", fmt.Errorf("get user by email: %w", err)
 	}
 
 	if userFromEmail != nil {
-		return models.ErrUserAlreadyExists
+		return "", models.ErrUserAlreadyExists
 	}
 
 	passwordHash, err := u.ss.HashPassword(ctx, password)
 	if err != nil {
-		return fmt.Errorf("hash password: %w", err)
+		return "", fmt.Errorf("hash password: %w", err)
 	}
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return fmt.Errorf("generate UUID: %w", err)
+		return "", fmt.Errorf("generate UUID: %w", err)
 	}
 
 	user := models.NewUser(id.String(), name, email, passwordHash, time.Now().UTC())
 
 	if err := u.ur.CreateUser(ctx, user); err != nil {
-		return fmt.Errorf("create user: %w", err)
+		return "", fmt.Errorf("create user: %w", err)
 	}
 
-	return nil
+	return id.String(), nil
 }
 
 func (u *userService) GetUserByID(ctx context.Context, ID string) (*models.UserResponse, error) {

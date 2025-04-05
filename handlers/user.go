@@ -14,7 +14,6 @@ import (
 )
 
 type UserHandler interface {
-	CreateUser(w http.ResponseWriter, r *http.Request)
 	GetProfile(w http.ResponseWriter, r *http.Request)
 	UpdateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
@@ -42,35 +41,6 @@ func NewUserHandler(i *di.Injector) (UserHandler, error) {
 		rc: requestContext,
 		ur: userService,
 	}, nil
-}
-
-func (u *userHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	logger := slog.With(
-		"handler", "user",
-		"method", "CreateUser",
-	)
-
-	var payload models.CreateUserPayload
-	if err := jsoniter.NewDecoder(r.Body).Decode(&payload); err != nil {
-		logger.Error("decode payload", slog.String("error", err.Error()))
-		responses.NoContent(w, http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	if err := u.ur.CreateUser(r.Context(), payload.Name, payload.Email, payload.Password); err != nil {
-		if err == models.ErrUserAlreadyExists {
-			logger.Error("user already exists", slog.String("error", err.Error()))
-			responses.NoContent(w, http.StatusConflict)
-			return
-		}
-
-		logger.Error("create user", slog.String("error", err.Error()))
-		responses.NoContent(w, http.StatusInternalServerError)
-		return
-	}
-
-	responses.NoContent(w, http.StatusCreated)
 }
 
 func (u *userHandler) GetProfile(w http.ResponseWriter, r *http.Request) {

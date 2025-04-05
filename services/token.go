@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/g-villarinho/link-fizz-api/config"
+	"github.com/g-villarinho/link-fizz-api/models"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
 	"github.com/g-villarinho/link-fizz-api/pkgs/ecdsa"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type TokenService interface {
-	GenerateToken(ctx context.Context, userID string) (string, error)
-	ValidateToken(ctx context.Context, tokenString string) (string, error)
+	GenerateToken(ctx context.Context, userID, sessionID string, iat, exp time.Time) (string, error)
+	ValidateToken(ctx context.Context, tokenString string) (*models.TokenClaims, error)
 }
 
 type tokenService struct {
@@ -33,7 +34,7 @@ func NewTokenService(i *di.Injector) (TokenService, error) {
 	}, nil
 }
 
-func (t *tokenService) GenerateToken(ctx context.Context, userID string) (string, error) {
+func (t *tokenService) GenerateToken(ctx context.Context, userID string, sessionID string, iat time.Time, exp time.Time) (string, error) {
 	privateKey, err := t.kp.ParseECDSAPrivateKey(config.Env.Key.PrivateKey)
 	if err != nil {
 		return "", err
@@ -42,8 +43,9 @@ func (t *tokenService) GenerateToken(ctx context.Context, userID string) (string
 	claims := jwt.MapClaims{
 		"iss": "link-fizz-app",
 		"sub": userID,
-		"iat": time.Now().UTC().Unix(),
-		"exp": time.Now().UTC().Add(time.Hour * 24 * 7).Unix(),
+		"sid": sessionID,
+		"iat": iat.Unix(),
+		"exp": exp.Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
@@ -55,10 +57,10 @@ func (t *tokenService) GenerateToken(ctx context.Context, userID string) (string
 	return signedToken, nil
 }
 
-func (t *tokenService) ValidateToken(ctx context.Context, tokenString string) (string, error) {
+func (t *tokenService) ValidateToken(ctx context.Context, tokenString string) (*models.TokenClaims, error) {
 	publicKey, err := t.kp.ParseECDSAPublicKey(config.Env.Key.PublicKey)
 	if err != nil {
-		return "", fmt.Errorf("parse public key: %w", err)
+		return nil, fmt.Errorf("parse public key: %w", err)
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -69,16 +71,25 @@ func (t *tokenService) ValidateToken(ctx context.Context, tokenString string) (s
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("parse token: %w", err)
+		return nil, fmt.Errorf("parse token: %w", err)
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userID, ok := claims["sub"].(string)
 		if !ok {
-			return "", fmt.Errorf("invalid token claims")
+			return nil, fmt.Errorf("invalid token claims")
 		}
-		return userID, nil
+
+		sessionID, ok := claims["sid"].(string)
+		if !ok {
+			return nil, fmt.Errorf("invalid token claims")
+		}
+
+		return &models.TokenClaims{
+			Sub: userID,
+			Sid: sessionID,
+		}, nil
 	}
 
-	return "", fmt.Errorf("invalid token")
+	return nil, fmt.Errorf("invalid token")
 }

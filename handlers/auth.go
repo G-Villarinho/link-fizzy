@@ -16,6 +16,7 @@ import (
 type AuthHandler interface {
 	Login(w http.ResponseWriter, r *http.Request)
 	Logout(w http.ResponseWriter, r *http.Request)
+	Register(w http.ResponseWriter, r *http.Request)
 }
 
 type authHandler struct {
@@ -42,6 +43,43 @@ func NewAuthHandler(i *di.Injector) (AuthHandler, error) {
 	}, nil
 }
 
+func (a *authHandler) Register(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		"handler", "user",
+		"method", "CreateUser",
+	)
+
+	var payload models.CreateUserPayload
+	if err := jsoniter.NewDecoder(r.Body).Decode(&payload); err != nil {
+		logger.Error("decode payload", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	ipAddress := r.Header.Get("X-Forwarded-For")
+	if ipAddress == "" {
+		ipAddress = r.RemoteAddr
+	}
+
+	userAgent := r.UserAgent()
+
+	response, err := a.as.Register(r.Context(), payload.Name, payload.Email, payload.Password, ipAddress, userAgent)
+	if err != nil {
+		if errors.Is(err, models.ErrUserAlreadyExists) {
+			logger.Warn("user already exists", slog.String("error", err.Error()))
+			responses.NoContent(w, http.StatusConflict)
+			return
+		}
+
+		logger.Error("create user", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	responses.JSON(w, http.StatusCreated, response)
+}
+
 func (a *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	logger := slog.With(
 		"handler", "login",
@@ -56,7 +94,13 @@ func (a *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	response, err := a.as.Login(r.Context(), payload.Email, payload.Password)
+	ipAddress := r.Header.Get("X-Forwarded-For")
+	if ipAddress == "" {
+		ipAddress = r.RemoteAddr
+	}
+	userAgent := r.UserAgent()
+
+	response, err := a.as.Login(r.Context(), payload.Email, payload.Password, ipAddress, userAgent)
 	if err != nil {
 		if errors.Is(err, models.ErrUserNotFound) || errors.Is(err, models.ErrInvalidCredentials) {
 			logger.Warn("invalid credentials", slog.String("error", err.Error()))
@@ -92,7 +136,14 @@ func (a *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := a.as.Logout(r.Context(), userID, token); err != nil {
+	sessionID, found := a.rc.GetSessionID(r.Context())
+	if !found {
+		logger.Error("session ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	if err := a.as.Logout(r.Context(), userID, sessionID, token); err != nil {
 		if err == models.ErrLogoutAlreadyExists {
 			logger.Error("logout already exists", slog.String("error", err.Error()))
 			responses.NoContent(w, http.StatusUnauthorized)

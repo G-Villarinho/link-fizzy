@@ -61,7 +61,7 @@ func (a *authMiddleware) Authenticate(next http.Handler) http.Handler {
 
 		token := parts[1]
 
-		userID, err := a.ts.ValidateToken(r.Context(), token)
+		claims, err := a.ts.ValidateToken(r.Context(), token)
 		if err != nil {
 			responses.NoContent(w, http.StatusUnauthorized)
 			return
@@ -78,8 +78,9 @@ func (a *authMiddleware) Authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := a.rc.SetUserID(r.Context(), userID)
+		ctx := a.rc.SetUserID(r.Context(), claims.Sub)
 		ctx = a.rc.SetToken(ctx, token)
+		ctx = a.rc.SetSessionID(ctx, claims.Sid)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

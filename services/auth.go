@@ -9,16 +9,17 @@ import (
 )
 
 type AuthService interface {
-	Login(ctx context.Context, email, password string) (*models.LoginResponse, error)
-	Logout(ctx context.Context, userID, token string) error
+	Register(ctx context.Context, name, email, password, ipAdress, userAgent string) (*models.LoginResponse, error)
+	Login(ctx context.Context, email, password, ipAdress, userAgent string) (*models.LoginResponse, error)
+	Logout(ctx context.Context, userID, sessionID, token string) error
 }
 
 type authService struct {
-	i  *di.Injector
-	ss SecurityService
-	ts TokenService
-	ls LogoutService
-	us UserService
+	i   *di.Injector
+	scs SecurityService
+	ss  SessionService
+	ls  LogoutService
+	us  UserService
 }
 
 func NewAuthService(i *di.Injector) (AuthService, error) {
@@ -27,9 +28,9 @@ func NewAuthService(i *di.Injector) (AuthService, error) {
 		return nil, fmt.Errorf("invoke services.SecurityService: %w", err)
 	}
 
-	tokenService, err := di.Invoke[TokenService](i)
+	sessionService, err := di.Invoke[SessionService](i)
 	if err != nil {
-		return nil, fmt.Errorf("invoke services.TokenService: %w", err)
+		return nil, fmt.Errorf("invoke services.SessionService: %w", err)
 	}
 
 	logoutService, err := di.Invoke[LogoutService](i)
@@ -43,27 +44,23 @@ func NewAuthService(i *di.Injector) (AuthService, error) {
 	}
 
 	return &authService{
-		i:  i,
-		ss: securityService,
-		ts: tokenService,
-		ls: logoutService,
-		us: userService,
+		i:   i,
+		scs: securityService,
+		ss:  sessionService,
+		ls:  logoutService,
+		us:  userService,
 	}, nil
 }
 
-func (l *authService) Login(ctx context.Context, email string, password string) (*models.LoginResponse, error) {
-	user, err := l.us.GetUserByEmail(ctx, email)
+func (l *authService) Register(ctx context.Context, name, email, password, ipAdress, userAgent string) (*models.LoginResponse, error) {
+	userID, err := l.us.CreateUser(ctx, name, email, password)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := l.ss.VerifyPassword(ctx, user.PasswordHash, password); err != nil {
-		return nil, models.ErrInvalidCredentials
-	}
-
-	token, err := l.ts.GenerateToken(ctx, user.ID)
+	token, err := l.ss.CreateSession(ctx, userID, ipAdress, userAgent)
 	if err != nil {
-		return nil, fmt.Errorf("generate token: %w", err)
+		return nil, fmt.Errorf("create session: %w", err)
 	}
 
 	return &models.LoginResponse{
@@ -71,7 +68,27 @@ func (l *authService) Login(ctx context.Context, email string, password string) 
 	}, nil
 }
 
-func (l *authService) Logout(ctx context.Context, userID string, token string) error {
+func (l *authService) Login(ctx context.Context, email, password, ipAdress, userAgent string) (*models.LoginResponse, error) {
+	user, err := l.us.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := l.scs.VerifyPassword(ctx, user.PasswordHash, password); err != nil {
+		return nil, models.ErrInvalidCredentials
+	}
+
+	token, err := l.ss.CreateSession(ctx, user.ID, ipAdress, userAgent)
+	if err != nil {
+		return nil, fmt.Errorf("create session: %w", err)
+	}
+
+	return &models.LoginResponse{
+		Token: token,
+	}, nil
+}
+
+func (l *authService) Logout(ctx context.Context, userID, sessionID, token string) error {
 	logout, err := l.ls.IsLogoutRegistered(ctx, token)
 	if err != nil {
 		return fmt.Errorf("check logout: %w", err)
@@ -83,6 +100,10 @@ func (l *authService) Logout(ctx context.Context, userID string, token string) e
 
 	if err := l.ls.CreateLogout(ctx, &userID, token); err != nil {
 		return fmt.Errorf("create logout: %w", err)
+	}
+
+	if err := l.ss.DeleteSession(ctx, sessionID); err != nil {
+		return fmt.Errorf("delete session: %w", err)
 	}
 
 	return nil

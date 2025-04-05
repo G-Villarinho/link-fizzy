@@ -49,12 +49,14 @@ func initDeps(i *di.Injector) *sql.DB {
 	di.Provide(i, services.NewLogoutService)
 	di.Provide(i, services.NewRedirectService)
 	di.Provide(i, services.NewLinkVisitService)
+	di.Provide(i, services.NewSessionService)
 
 	// Repositories
 	di.Provide(i, repositories.NewLinkRepository)
 	di.Provide(i, repositories.NewUserRepository)
 	di.Provide(i, repositories.NewLogoutRepository)
 	di.Provide(i, repositories.NewLinkVisitRepository)
+	di.Provide(i, repositories.NewSessionRepository)
 
 	return db
 }
@@ -98,8 +100,6 @@ func setupUserRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 		log.Fatal("failed to invoke auth middleware:", err)
 	}
 
-	mux.HandleFunc("POST /users", userHandler.CreateUser)
-
 	mux.Handle("GET /me", authMiddleware.Authenticate(http.HandlerFunc(userHandler.GetProfile)))
 	mux.Handle("PUT /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.UpdateUser)))
 	mux.Handle("DELETE /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.DeleteUser)))
@@ -118,6 +118,7 @@ func setupAuthRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 		log.Fatal("failed to invoke auth middleware:", err)
 	}
 
+	mux.HandleFunc("POST /register", authHandler.Register)
 	mux.HandleFunc("POST /login", authHandler.Login)
 
 	mux.Handle("POST /logout", authMiddleware.Authenticate(http.HandlerFunc(authHandler.Logout)))
