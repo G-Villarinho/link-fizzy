@@ -6,8 +6,8 @@ import (
 )
 
 var allowedOrigins = map[string]bool{
-	"http://localhost:3001": true,
-	"http://localhost:5175": true}
+	"http://localhost:3000": true,
+	"http://localhost:5173": true}
 
 var allowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 var allowedHeaders = []string{"Content-Type", "Authorization", "X-Requested-With"}
