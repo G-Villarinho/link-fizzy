@@ -37,3 +37,16 @@ CREATE TABLE IF NOT EXISTS link_visits (
     
 	FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS sessions (
+  id CHAR(36) PRIMARY KEY,
+  user_id CHAR(36) NOT NULL,
+  token VARCHAR(512) NOT NULL UNIQUE,
+  ip VARCHAR(45) NOT NULL,
+  agent TEXT NOT NULL,
+  created_at DATETIME NOT NULL,
+  expire_at DATETIME NOT NULL,
+
+  
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
