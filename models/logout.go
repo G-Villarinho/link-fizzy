@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"time"
 )
@@ -12,7 +13,7 @@ var (
 
 type Logout struct {
 	ID        string
-	UserID    string
+	UserID    sql.NullString
 	Token     string
 	RevokedAt time.Time
 }

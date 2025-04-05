@@ -16,29 +16,36 @@ type UserService interface {
 	GetUserByID(ctx context.Context, ID string) (*models.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	UpdateUser(ctx context.Context, ID string, name, email string) error
-	DeleteUser(ctx context.Context, ID string) error
+	DeleteUser(ctx context.Context, ID, token string) error
 }
 
 type userService struct {
 	i  *di.Injector
 	ss SecurityService
+	ls LogoutService
 	ur repositories.UserRepository
 }
 
 func NewUserService(i *di.Injector) (UserService, error) {
 	securityService, err := di.Invoke[SecurityService](i)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invoke services.security: %w", err)
+	}
+
+	logoutService, err := di.Invoke[LogoutService](i)
+	if err != nil {
+		return nil, fmt.Errorf("invoke services.logout: %w", err)
 	}
 
 	userRepository, err := di.Invoke[repositories.UserRepository](i)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("invoke repositories.user: %w", err)
 	}
 
 	return &userService{
 		i:  i,
 		ss: securityService,
+		ls: logoutService,
 		ur: userRepository,
 	}, nil
 }
@@ -130,9 +137,13 @@ func (u *userService) UpdateUser(ctx context.Context, ID string, name string, em
 	return nil
 }
 
-func (u *userService) DeleteUser(ctx context.Context, ID string) error {
+func (u *userService) DeleteUser(ctx context.Context, ID, token string) error {
 	if err := u.ur.DeleteUser(ctx, ID); err != nil {
 		return fmt.Errorf("delete user: %w", err)
+	}
+
+	if err := u.ls.CreateLogout(ctx, nil, token); err != nil {
+		return fmt.Errorf("create logout: %w", err)
 	}
 
 	return nil

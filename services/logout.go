@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -12,7 +13,7 @@ import (
 )
 
 type LogoutService interface {
-	CreateLogout(ctx context.Context, userID, token string) error
+	CreateLogout(ctx context.Context, userID *string, token string) error
 	IsLogoutRegistered(ctx context.Context, token string) (bool, error)
 }
 
@@ -33,7 +34,7 @@ func NewLogoutService(i *di.Injector) (LogoutService, error) {
 	}, nil
 }
 
-func (l *logoutService) CreateLogout(ctx context.Context, userID string, token string) error {
+func (l *logoutService) CreateLogout(ctx context.Context, userID *string, token string) error {
 	id, err := uuid.NewRandom()
 	if err != nil {
 		return fmt.Errorf("uuid.NewRandom: %w", err)
@@ -41,9 +42,12 @@ func (l *logoutService) CreateLogout(ctx context.Context, userID string, token s
 
 	logout := &models.Logout{
 		ID:        id.String(),
-		UserID:    userID,
 		Token:     token,
 		RevokedAt: time.Now().UTC(),
+	}
+
+	if userID != nil {
+		logout.UserID = sql.NullString{String: *userID, Valid: true}
 	}
 
 	if err := l.lr.CreateLogout(ctx, logout); err != nil {

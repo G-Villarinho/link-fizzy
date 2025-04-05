@@ -81,7 +81,7 @@ func (l *authService) Logout(ctx context.Context, userID string, token string) e
 		return models.ErrLogoutAlreadyExists
 	}
 
-	if err := l.ls.CreateLogout(ctx, userID, token); err != nil {
+	if err := l.ls.CreateLogout(ctx, &userID, token); err != nil {
 		return fmt.Errorf("create logout: %w", err)
 	}
 

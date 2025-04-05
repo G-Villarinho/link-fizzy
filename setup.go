@@ -98,6 +98,8 @@ func setupUserRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 	mux.HandleFunc("POST /users", userHandler.CreateUser)
 
 	mux.Handle("GET /me", authMiddleware.Authenticate(http.HandlerFunc(userHandler.GetProfile)))
+	mux.Handle("PUT /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.UpdateUser)))
+	mux.Handle("DELETE /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.DeleteUser)))
 
 	return mux
 }
