@@ -47,11 +47,14 @@ func initDeps(i *di.Injector) *sql.DB {
 	di.Provide(i, services.NewSecurityService)
 	di.Provide(i, services.NewTokenService)
 	di.Provide(i, services.NewLogoutService)
+	di.Provide(i, services.NewRedirectService)
+	di.Provide(i, services.NewLinkVisitService)
 
 	// Repositories
 	di.Provide(i, repositories.NewLinkRepository)
 	di.Provide(i, repositories.NewUserRepository)
 	di.Provide(i, repositories.NewLogoutRepository)
+	di.Provide(i, repositories.NewLinkVisitRepository)
 
 	return db
 }
