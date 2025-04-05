@@ -5,6 +5,7 @@ package mocks
 import (
 	context "context"
 
+	models "github.com/g-villarinho/link-fizz-api/models"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -65,6 +66,65 @@ func (_c *LinkServiceMock_CreateLink_Call) Return(_a0 error) *LinkServiceMock_Cr
 }
 
 func (_c *LinkServiceMock_CreateLink_Call) RunAndReturn(run func(context.Context, string, string) error) *LinkServiceMock_CreateLink_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetLinkByShortCode provides a mock function with given fields: ctx, shortCode
+func (_m *LinkServiceMock) GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error) {
+	ret := _m.Called(ctx, shortCode)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLinkByShortCode")
+	}
+
+	var r0 *models.Link
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.Link, error)); ok {
+		return rf(ctx, shortCode)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *models.Link); ok {
+		r0 = rf(ctx, shortCode)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Link)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, shortCode)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// LinkServiceMock_GetLinkByShortCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLinkByShortCode'
+type LinkServiceMock_GetLinkByShortCode_Call struct {
+	*mock.Call
+}
+
+// GetLinkByShortCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - shortCode string
+func (_e *LinkServiceMock_Expecter) GetLinkByShortCode(ctx interface{}, shortCode interface{}) *LinkServiceMock_GetLinkByShortCode_Call {
+	return &LinkServiceMock_GetLinkByShortCode_Call{Call: _e.mock.On("GetLinkByShortCode", ctx, shortCode)}
+}
+
+func (_c *LinkServiceMock_GetLinkByShortCode_Call) Run(run func(ctx context.Context, shortCode string)) *LinkServiceMock_GetLinkByShortCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *LinkServiceMock_GetLinkByShortCode_Call) Return(_a0 *models.Link, _a1 error) *LinkServiceMock_GetLinkByShortCode_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *LinkServiceMock_GetLinkByShortCode_Call) RunAndReturn(run func(context.Context, string) (*models.Link, error)) *LinkServiceMock_GetLinkByShortCode_Call {
 	_c.Call.Return(run)
 	return _c
 }

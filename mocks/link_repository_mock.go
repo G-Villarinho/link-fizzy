@@ -187,6 +187,65 @@ func (_c *LinkRepositoryMock_GetLinkByID_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// GetLinkByShortCode provides a mock function with given fields: ctx, shortCode
+func (_m *LinkRepositoryMock) GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error) {
+	ret := _m.Called(ctx, shortCode)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLinkByShortCode")
+	}
+
+	var r0 *models.Link
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*models.Link, error)); ok {
+		return rf(ctx, shortCode)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *models.Link); ok {
+		r0 = rf(ctx, shortCode)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Link)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, shortCode)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// LinkRepositoryMock_GetLinkByShortCode_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLinkByShortCode'
+type LinkRepositoryMock_GetLinkByShortCode_Call struct {
+	*mock.Call
+}
+
+// GetLinkByShortCode is a helper method to define mock.On call
+//   - ctx context.Context
+//   - shortCode string
+func (_e *LinkRepositoryMock_Expecter) GetLinkByShortCode(ctx interface{}, shortCode interface{}) *LinkRepositoryMock_GetLinkByShortCode_Call {
+	return &LinkRepositoryMock_GetLinkByShortCode_Call{Call: _e.mock.On("GetLinkByShortCode", ctx, shortCode)}
+}
+
+func (_c *LinkRepositoryMock_GetLinkByShortCode_Call) Run(run func(ctx context.Context, shortCode string)) *LinkRepositoryMock_GetLinkByShortCode_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *LinkRepositoryMock_GetLinkByShortCode_Call) Return(_a0 *models.Link, _a1 error) *LinkRepositoryMock_GetLinkByShortCode_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *LinkRepositoryMock_GetLinkByShortCode_Call) RunAndReturn(run func(context.Context, string) (*models.Link, error)) *LinkRepositoryMock_GetLinkByShortCode_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetOriginalURLByShortCode provides a mock function with given fields: ctx, shortCode
 func (_m *LinkRepositoryMock) GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error) {
 	ret := _m.Called(ctx, shortCode)

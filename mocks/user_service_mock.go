@@ -71,6 +71,54 @@ func (_c *UserServiceMock_CreateUser_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// DeleteUser provides a mock function with given fields: ctx, ID, token
+func (_m *UserServiceMock) DeleteUser(ctx context.Context, ID string, token string) error {
+	ret := _m.Called(ctx, ID, token)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, ID, token)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UserServiceMock_DeleteUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteUser'
+type UserServiceMock_DeleteUser_Call struct {
+	*mock.Call
+}
+
+// DeleteUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - ID string
+//   - token string
+func (_e *UserServiceMock_Expecter) DeleteUser(ctx interface{}, ID interface{}, token interface{}) *UserServiceMock_DeleteUser_Call {
+	return &UserServiceMock_DeleteUser_Call{Call: _e.mock.On("DeleteUser", ctx, ID, token)}
+}
+
+func (_c *UserServiceMock_DeleteUser_Call) Run(run func(ctx context.Context, ID string, token string)) *UserServiceMock_DeleteUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
+	})
+	return _c
+}
+
+func (_c *UserServiceMock_DeleteUser_Call) Return(_a0 error) *UserServiceMock_DeleteUser_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *UserServiceMock_DeleteUser_Call) RunAndReturn(run func(context.Context, string, string) error) *UserServiceMock_DeleteUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetUserByEmail provides a mock function with given fields: ctx, email
 func (_m *UserServiceMock) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
 	ret := _m.Called(ctx, email)
@@ -185,6 +233,55 @@ func (_c *UserServiceMock_GetUserByID_Call) Return(_a0 *models.UserResponse, _a1
 }
 
 func (_c *UserServiceMock_GetUserByID_Call) RunAndReturn(run func(context.Context, string) (*models.UserResponse, error)) *UserServiceMock_GetUserByID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateUser provides a mock function with given fields: ctx, ID, name, email
+func (_m *UserServiceMock) UpdateUser(ctx context.Context, ID string, name string, email string) error {
+	ret := _m.Called(ctx, ID, name, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateUser")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string) error); ok {
+		r0 = rf(ctx, ID, name, email)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UserServiceMock_UpdateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateUser'
+type UserServiceMock_UpdateUser_Call struct {
+	*mock.Call
+}
+
+// UpdateUser is a helper method to define mock.On call
+//   - ctx context.Context
+//   - ID string
+//   - name string
+//   - email string
+func (_e *UserServiceMock_Expecter) UpdateUser(ctx interface{}, ID interface{}, name interface{}, email interface{}) *UserServiceMock_UpdateUser_Call {
+	return &UserServiceMock_UpdateUser_Call{Call: _e.mock.On("UpdateUser", ctx, ID, name, email)}
+}
+
+func (_c *UserServiceMock_UpdateUser_Call) Run(run func(ctx context.Context, ID string, name string, email string)) *UserServiceMock_UpdateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(string))
+	})
+	return _c
+}
+
+func (_c *UserServiceMock_UpdateUser_Call) Return(_a0 error) *UserServiceMock_UpdateUser_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *UserServiceMock_UpdateUser_Call) RunAndReturn(run func(context.Context, string, string, string) error) *UserServiceMock_UpdateUser_Call {
 	_c.Call.Return(run)
 	return _c
 }

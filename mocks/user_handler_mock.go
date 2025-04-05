@@ -55,6 +55,40 @@ func (_c *UserHandlerMock_CreateUser_Call) RunAndReturn(run func(http.ResponseWr
 	return _c
 }
 
+// DeleteUser provides a mock function with given fields: w, r
+func (_m *UserHandlerMock) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	_m.Called(w, r)
+}
+
+// UserHandlerMock_DeleteUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteUser'
+type UserHandlerMock_DeleteUser_Call struct {
+	*mock.Call
+}
+
+// DeleteUser is a helper method to define mock.On call
+//   - w http.ResponseWriter
+//   - r *http.Request
+func (_e *UserHandlerMock_Expecter) DeleteUser(w interface{}, r interface{}) *UserHandlerMock_DeleteUser_Call {
+	return &UserHandlerMock_DeleteUser_Call{Call: _e.mock.On("DeleteUser", w, r)}
+}
+
+func (_c *UserHandlerMock_DeleteUser_Call) Run(run func(w http.ResponseWriter, r *http.Request)) *UserHandlerMock_DeleteUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(http.ResponseWriter), args[1].(*http.Request))
+	})
+	return _c
+}
+
+func (_c *UserHandlerMock_DeleteUser_Call) Return() *UserHandlerMock_DeleteUser_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *UserHandlerMock_DeleteUser_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request)) *UserHandlerMock_DeleteUser_Call {
+	_c.Run(run)
+	return _c
+}
+
 // GetProfile provides a mock function with given fields: w, r
 func (_m *UserHandlerMock) GetProfile(w http.ResponseWriter, r *http.Request) {
 	_m.Called(w, r)
@@ -85,6 +119,40 @@ func (_c *UserHandlerMock_GetProfile_Call) Return() *UserHandlerMock_GetProfile_
 }
 
 func (_c *UserHandlerMock_GetProfile_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request)) *UserHandlerMock_GetProfile_Call {
+	_c.Run(run)
+	return _c
+}
+
+// UpdateUser provides a mock function with given fields: w, r
+func (_m *UserHandlerMock) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	_m.Called(w, r)
+}
+
+// UserHandlerMock_UpdateUser_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateUser'
+type UserHandlerMock_UpdateUser_Call struct {
+	*mock.Call
+}
+
+// UpdateUser is a helper method to define mock.On call
+//   - w http.ResponseWriter
+//   - r *http.Request
+func (_e *UserHandlerMock_Expecter) UpdateUser(w interface{}, r interface{}) *UserHandlerMock_UpdateUser_Call {
+	return &UserHandlerMock_UpdateUser_Call{Call: _e.mock.On("UpdateUser", w, r)}
+}
+
+func (_c *UserHandlerMock_UpdateUser_Call) Run(run func(w http.ResponseWriter, r *http.Request)) *UserHandlerMock_UpdateUser_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(http.ResponseWriter), args[1].(*http.Request))
+	})
+	return _c
+}
+
+func (_c *UserHandlerMock_UpdateUser_Call) Return() *UserHandlerMock_UpdateUser_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *UserHandlerMock_UpdateUser_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request)) *UserHandlerMock_UpdateUser_Call {
 	_c.Run(run)
 	return _c
 }

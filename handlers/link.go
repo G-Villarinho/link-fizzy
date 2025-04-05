@@ -23,6 +23,7 @@ type LinkHandler interface {
 type linkHandler struct {
 	i  *di.Injector
 	ls services.LinkService
+	rs services.RedirectService
 	rc requestcontext.RequestContext
 }
 
@@ -30,6 +31,11 @@ func NewLinkHandler(i *di.Injector) (LinkHandler, error) {
 	linkService, err := di.Invoke[services.LinkService](i)
 	if err != nil {
 		return nil, fmt.Errorf("invoke services.LinkService: %w", err)
+	}
+
+	redirectService, err := di.Invoke[services.RedirectService](i)
+	if err != nil {
+		return nil, fmt.Errorf("invoke services.RedirectService: %w", err)
 	}
 
 	requestContext, err := di.Invoke[requestcontext.RequestContext](i)
@@ -40,6 +46,7 @@ func NewLinkHandler(i *di.Injector) (LinkHandler, error) {
 	return &linkHandler{
 		i:  i,
 		ls: linkService,
+		rs: redirectService,
 		rc: requestContext,
 	}, nil
 }
@@ -98,7 +105,14 @@ func (l *linkHandler) RedirectLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	originalURL, err := l.ls.GetOriginalURLByShortCode(r.Context(), shortCode)
+	ip := r.Header.Get("X-Forwarded-For")
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+
+	userAgent := r.UserAgent()
+
+	originalURL, err := l.rs.GetOriginalURLWithTracking(r.Context(), shortCode, userAgent, ip)
 	if err != nil {
 		if err == models.ErrLinkNotFound {
 			logger.Error("original URL not found")

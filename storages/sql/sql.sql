@@ -26,3 +26,14 @@ CREATE TABLE IF NOT EXISTS logouts (
     
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS link_visits (
+    id CHAR(36) PRIMARY KEY,
+    link_id CHAR(36) NOT NULL,
+    ip TEXT NOT NULL,
+    agent TEXT NOT NULL,
+    visited_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    
+	FOREIGN KEY (link_id) REFERENCES links(id) ON DELETE CASCADE
+);

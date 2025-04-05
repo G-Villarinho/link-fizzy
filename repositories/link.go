@@ -14,6 +14,7 @@ type LinkRepository interface {
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetLinkByID(ctx context.Context, ID string) (*models.Link, error)
 	GetAllShortCodesByUserID(ctx context.Context, userID string) ([]string, error)
+	GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error)
 }
 
 type linkRepository struct {
@@ -67,19 +68,7 @@ func (l *linkRepository) GetLinkByID(ctx context.Context, ID string) (*models.Li
 	}
 	defer statement.Close()
 
-	return l.scanLink(statement.QueryRowContext(ctx, ID))
-}
-
-func (l *linkRepository) scanLink(row *sql.Row) (*models.Link, error) {
-	var link models.Link
-	err := row.Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.CreatedAt, &link.UpdatedAt)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("scan link: %w", err)
-	}
-	return &link, nil
+	return scanLink(statement.QueryRowContext(ctx, ID))
 }
 
 func (l *linkRepository) GetAllShortCodesByUserID(ctx context.Context, userID string) ([]string, error) {
@@ -105,4 +94,27 @@ func (l *linkRepository) GetAllShortCodesByUserID(ctx context.Context, userID st
 	}
 
 	return shortCodes, nil
+}
+
+func (l *linkRepository) GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error) {
+	statement, err := l.db.PrepareContext(ctx, "SELECT id, original_url, short_code, user_id, created_at, updated_at FROM links WHERE short_code = ?")
+	if err != nil {
+		return nil, fmt.Errorf("prepare select: %w", err)
+	}
+	defer statement.Close()
+
+	return scanLink(statement.QueryRowContext(ctx, shortCode))
+}
+
+func scanLink(row *sql.Row) (*models.Link, error) {
+	var link models.Link
+	err := row.Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.CreatedAt, &link.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("scan link: %w", err)
+	}
+
+	return &link, nil
 }

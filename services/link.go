@@ -18,6 +18,7 @@ type LinkService interface {
 	CreateLink(ctx context.Context, userID, originalURL string) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetUsersShortURLs(ctx context.Context, userID string) ([]string, error)
+	GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error)
 }
 
 type linkService struct {
@@ -101,4 +102,17 @@ func (l *linkService) GetUsersShortURLs(ctx context.Context, userID string) ([]s
 	}
 
 	return shortUrls, nil
+}
+
+func (l *linkService) GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error) {
+	link, err := l.lr.GetLinkByShortCode(ctx, shortCode)
+	if err != nil {
+		return nil, fmt.Errorf("get link by short code: %w", err)
+	}
+
+	if link == nil {
+		return nil, models.ErrLinkNotFound
+	}
+
+	return link, nil
 }
