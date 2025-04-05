@@ -15,6 +15,8 @@ type UserService interface {
 	CreateUser(ctx context.Context, name, email, password string) error
 	GetUserByID(ctx context.Context, ID string) (*models.UserResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	UpdateUser(ctx context.Context, ID string, name, email string) error
+	DeleteUser(ctx context.Context, ID string) error
 }
 
 type userService struct {
@@ -94,4 +96,44 @@ func (u *userService) GetUserByEmail(ctx context.Context, email string) (*models
 	}
 
 	return user, nil
+}
+
+func (u *userService) UpdateUser(ctx context.Context, ID string, name string, email string) error {
+	user, err := u.ur.GetUserByID(ctx, ID)
+	if err != nil {
+		return fmt.Errorf("get user by ID %s: %w", ID, err)
+	}
+
+	if user == nil {
+		return models.ErrUserNotFound
+	}
+
+	if user.Email != email {
+		userFromEmail, err := u.ur.GetUserByEmail(ctx, email)
+		if err != nil {
+			return fmt.Errorf("get user by email: %w", err)
+		}
+
+		if userFromEmail != nil {
+			return models.ErrUserAlreadyExists
+		}
+
+		user.Email = email
+	}
+
+	user.Name = name
+
+	if err := u.ur.UpdateUser(ctx, user); err != nil {
+		return fmt.Errorf("update user: %w", err)
+	}
+
+	return nil
+}
+
+func (u *userService) DeleteUser(ctx context.Context, ID string) error {
+	if err := u.ur.DeleteUser(ctx, ID); err != nil {
+		return fmt.Errorf("delete user: %w", err)
+	}
+
+	return nil
 }

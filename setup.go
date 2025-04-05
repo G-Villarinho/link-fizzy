@@ -112,5 +112,7 @@ func setupLoginRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 }
 
 func applyMiddlewares(handler http.Handler) http.Handler {
-	return middlewares.CorsMiddleware(handler)
+	return middlewares.CorsMiddleware(
+		"http://localhost:3000/",
+	)(handler)
 }
