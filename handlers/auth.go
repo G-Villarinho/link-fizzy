@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -57,14 +58,8 @@ func (a *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	response, err := a.as.Login(r.Context(), payload.Email, payload.Password)
 	if err != nil {
-		if err == models.ErrUserNotFound {
-			logger.Error("invalid credentials", slog.String("error", err.Error()))
-			responses.NoContent(w, http.StatusNotFound)
-			return
-		}
-
-		if err == models.ErrInvalidCredentials {
-			logger.Error("invalid credentials", slog.String("error", err.Error()))
+		if errors.Is(err, models.ErrUserNotFound) || errors.Is(err, models.ErrInvalidCredentials) {
+			logger.Warn("invalid credentials", slog.String("error", err.Error()))
 			responses.NoContent(w, http.StatusUnauthorized)
 			return
 		}
