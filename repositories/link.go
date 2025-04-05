@@ -35,7 +35,7 @@ func NewLinkRepository(i *di.Injector) (LinkRepository, error) {
 }
 
 func (l *linkRepository) CreateLink(ctx context.Context, link models.Link) error {
-	statement, err := l.db.PrepareContext(ctx, "INSERT INTO links (id, original_url, user_id, short_code, created_at) VALUES (?, ?, ?, ?, ?)")
+	statement, err := l.db.PrepareContext(ctx, "INSERT INTO links (id, title, original_url, user_id, short_code, created_at) VALUES (?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return fmt.Errorf("prepare insert: %w", err)
 	}
@@ -62,7 +62,7 @@ func (l *linkRepository) GetOriginalURLByShortCode(ctx context.Context, shortCod
 }
 
 func (l *linkRepository) GetLinkByID(ctx context.Context, ID string) (*models.Link, error) {
-	statement, err := l.db.PrepareContext(ctx, "SELECT id, original_url, short_code, user_id, created_at, updated_at FROM links WHERE id = ?")
+	statement, err := l.db.PrepareContext(ctx, "SELECT id, title, original_url, short_code, user_id, created_at, updated_at FROM links WHERE id = ?")
 	if err != nil {
 		return nil, fmt.Errorf("prepare select: %w", err)
 	}
@@ -97,7 +97,7 @@ func (l *linkRepository) GetAllShortCodesByUserID(ctx context.Context, userID st
 }
 
 func (l *linkRepository) GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error) {
-	statement, err := l.db.PrepareContext(ctx, "SELECT id, original_url, short_code, user_id, created_at, updated_at FROM links WHERE short_code = ?")
+	statement, err := l.db.PrepareContext(ctx, "SELECT id, title, original_url, short_code, user_id, created_at, updated_at FROM links WHERE short_code = ?")
 	if err != nil {
 		return nil, fmt.Errorf("prepare select: %w", err)
 	}
@@ -108,7 +108,7 @@ func (l *linkRepository) GetLinkByShortCode(ctx context.Context, shortCode strin
 
 func scanLink(row *sql.Row) (*models.Link, error) {
 	var link models.Link
-	err := row.Scan(&link.ID, &link.OriginalURL, &link.ShortCode, &link.UserID, &link.CreatedAt, &link.UpdatedAt)
+	err := row.Scan(&link.ID, &link.Title, &link.OriginalURL, &link.ShortCode, &link.UserID, &link.CreatedAt, &link.UpdatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

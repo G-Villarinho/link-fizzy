@@ -32,7 +32,7 @@ func NewSessionRepository(i *di.Injector) (SessionRepository, error) {
 }
 
 func (s *sessionRepository) CreateSession(ctx context.Context, session *models.Session) error {
-	statment, err := s.db.PrepareContext(ctx, "INSERT INTO sessions (id, user_id, token, ip, agent, create_at, expire_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
+	statment, err := s.db.PrepareContext(ctx, "INSERT INTO sessions (id, user_id, token, ip, agent, created_at, expire_at) VALUES (?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return fmt.Errorf("prepare statement: %w", err)
 	}

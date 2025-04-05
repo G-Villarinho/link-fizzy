@@ -89,6 +89,40 @@ func (_c *AuthHandlerMock_Logout_Call) RunAndReturn(run func(http.ResponseWriter
 	return _c
 }
 
+// Register provides a mock function with given fields: w, r
+func (_m *AuthHandlerMock) Register(w http.ResponseWriter, r *http.Request) {
+	_m.Called(w, r)
+}
+
+// AuthHandlerMock_Register_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Register'
+type AuthHandlerMock_Register_Call struct {
+	*mock.Call
+}
+
+// Register is a helper method to define mock.On call
+//   - w http.ResponseWriter
+//   - r *http.Request
+func (_e *AuthHandlerMock_Expecter) Register(w interface{}, r interface{}) *AuthHandlerMock_Register_Call {
+	return &AuthHandlerMock_Register_Call{Call: _e.mock.On("Register", w, r)}
+}
+
+func (_c *AuthHandlerMock_Register_Call) Run(run func(w http.ResponseWriter, r *http.Request)) *AuthHandlerMock_Register_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(http.ResponseWriter), args[1].(*http.Request))
+	})
+	return _c
+}
+
+func (_c *AuthHandlerMock_Register_Call) Return() *AuthHandlerMock_Register_Call {
+	_c.Call.Return()
+	return _c
+}
+
+func (_c *AuthHandlerMock_Register_Call) RunAndReturn(run func(http.ResponseWriter, *http.Request)) *AuthHandlerMock_Register_Call {
+	_c.Run(run)
+	return _c
+}
+
 // NewAuthHandlerMock creates a new instance of AuthHandlerMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAuthHandlerMock(t interface {

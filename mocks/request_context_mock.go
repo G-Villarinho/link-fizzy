@@ -21,6 +21,62 @@ func (_m *RequestContextMock) EXPECT() *RequestContextMock_Expecter {
 	return &RequestContextMock_Expecter{mock: &_m.Mock}
 }
 
+// GetSessionID provides a mock function with given fields: ctx
+func (_m *RequestContextMock) GetSessionID(ctx context.Context) (string, bool) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetSessionID")
+	}
+
+	var r0 string
+	var r1 bool
+	if rf, ok := ret.Get(0).(func(context.Context) (string, bool)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) string); ok {
+		r0 = rf(ctx)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) bool); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Get(1).(bool)
+	}
+
+	return r0, r1
+}
+
+// RequestContextMock_GetSessionID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetSessionID'
+type RequestContextMock_GetSessionID_Call struct {
+	*mock.Call
+}
+
+// GetSessionID is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *RequestContextMock_Expecter) GetSessionID(ctx interface{}) *RequestContextMock_GetSessionID_Call {
+	return &RequestContextMock_GetSessionID_Call{Call: _e.mock.On("GetSessionID", ctx)}
+}
+
+func (_c *RequestContextMock_GetSessionID_Call) Run(run func(ctx context.Context)) *RequestContextMock_GetSessionID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *RequestContextMock_GetSessionID_Call) Return(_a0 string, _a1 bool) *RequestContextMock_GetSessionID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *RequestContextMock_GetSessionID_Call) RunAndReturn(run func(context.Context) (string, bool)) *RequestContextMock_GetSessionID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetToken provides a mock function with given fields: ctx
 func (_m *RequestContextMock) GetToken(ctx context.Context) (string, bool) {
 	ret := _m.Called(ctx)
@@ -129,6 +185,55 @@ func (_c *RequestContextMock_GetUserID_Call) Return(_a0 string, _a1 bool) *Reque
 }
 
 func (_c *RequestContextMock_GetUserID_Call) RunAndReturn(run func(context.Context) (string, bool)) *RequestContextMock_GetUserID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// SetSessionID provides a mock function with given fields: ctx, sessionID
+func (_m *RequestContextMock) SetSessionID(ctx context.Context, sessionID string) context.Context {
+	ret := _m.Called(ctx, sessionID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SetSessionID")
+	}
+
+	var r0 context.Context
+	if rf, ok := ret.Get(0).(func(context.Context, string) context.Context); ok {
+		r0 = rf(ctx, sessionID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(context.Context)
+		}
+	}
+
+	return r0
+}
+
+// RequestContextMock_SetSessionID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SetSessionID'
+type RequestContextMock_SetSessionID_Call struct {
+	*mock.Call
+}
+
+// SetSessionID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - sessionID string
+func (_e *RequestContextMock_Expecter) SetSessionID(ctx interface{}, sessionID interface{}) *RequestContextMock_SetSessionID_Call {
+	return &RequestContextMock_SetSessionID_Call{Call: _e.mock.On("SetSessionID", ctx, sessionID)}
+}
+
+func (_c *RequestContextMock_SetSessionID_Call) Run(run func(ctx context.Context, sessionID string)) *RequestContextMock_SetSessionID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *RequestContextMock_SetSessionID_Call) Return(_a0 context.Context) *RequestContextMock_SetSessionID_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *RequestContextMock_SetSessionID_Call) RunAndReturn(run func(context.Context, string) context.Context) *RequestContextMock_SetSessionID_Call {
 	_c.Call.Return(run)
 	return _c
 }

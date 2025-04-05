@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/g-villarinho/link-fizz-api/config"
@@ -15,7 +17,7 @@ import (
 const shortCodeLength = 8
 
 type LinkService interface {
-	CreateLink(ctx context.Context, userID, originalURL string) error
+	CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) error
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetUsersShortURLs(ctx context.Context, userID string) ([]string, error)
 	GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error)
@@ -45,10 +47,29 @@ func NewLinkService(i *di.Injector) (LinkService, error) {
 	}, nil
 }
 
-func (l *linkService) CreateLink(ctx context.Context, userID, originalURL string) error {
-	shortCode, err := l.us.GenerateShortCode(shortCodeLength)
-	if err != nil {
-		return fmt.Errorf("generate short code: %w", err)
+func (l *linkService) CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) error {
+	var shortCode string
+
+	if customCode != nil && *customCode != "" {
+		cleanCode := strings.ReplaceAll(*customCode, " ", "")
+
+		linkFromCode, err := l.lr.GetLinkByShortCode(ctx, cleanCode)
+		if err != nil {
+			return fmt.Errorf("get link by short code: %w", err)
+		}
+
+		if linkFromCode != nil {
+			return models.ErrCustomCodeAlreadyExists
+		}
+
+		shortCode = cleanCode
+	} else {
+		generatedCode, err := l.us.GenerateShortCode(shortCodeLength)
+		if err != nil {
+			return fmt.Errorf("generate short code: %w", err)
+		}
+
+		shortCode = generatedCode
 	}
 
 	id, err := uuid.NewRandom()
@@ -58,7 +79,8 @@ func (l *linkService) CreateLink(ctx context.Context, userID, originalURL string
 
 	link := models.Link{
 		ID:          id.String(),
-		OriginalURL: originalURL,
+		Title:       sql.NullString{String: *title, Valid: title != nil},
+		OriginalURL: destinationURL,
 		ShortCode:   shortCode,
 		UserID:      userID,
 		CreatedAt:   time.Now().UTC(),

@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS links (
     id VARCHAR(36) PRIMARY KEY,
     original_url TEXT NOT NULL,
+    title varchar(100) NULL DEFAULT NULL,
     short_code VARCHAR(20) NOT NULL UNIQUE,
     user_id VARCHAR(36) NOT NULL,
     created_at TIMESTAMP NOT NULL,

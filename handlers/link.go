@@ -65,7 +65,7 @@ func (l *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if payload.OriginalURL == "" {
+	if payload.DestinationURL == "" {
 		logger.Error("empty original URL")
 		responses.NoContent(w, http.StatusBadRequest)
 		return
@@ -78,12 +78,12 @@ func (l *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, err := url.ParseRequestURI(payload.OriginalURL); err != nil {
+	if _, err := url.ParseRequestURI(payload.DestinationURL); err != nil {
 		responses.NoContent(w, http.StatusBadRequest)
 		return
 	}
 
-	if err := l.ls.CreateLink(r.Context(), userID, payload.OriginalURL); err != nil {
+	if err := l.ls.CreateLink(r.Context(), userID, payload.DestinationURL, payload.Title, payload.CustomCode); err != nil {
 		logger.Error("create link", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
 		return
