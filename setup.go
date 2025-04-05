@@ -63,7 +63,7 @@ func setupRoutes(i *di.Injector) http.Handler {
 	setupUserRoutes(mux, i)
 	setupAuthRoutes(mux, i)
 
-	return mux
+	return middlewares.Cors(mux)
 }
 
 func setupLinkRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
