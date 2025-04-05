@@ -17,11 +17,17 @@ type AuthMiddleware interface {
 type authMiddleware struct {
 	i  *di.Injector
 	ts services.TokenService
+	ls services.LogoutService
 	rc requestcontext.RequestContext
 }
 
 func NewAuthMiddleware(i *di.Injector) (AuthMiddleware, error) {
 	tokenService, err := di.Invoke[services.TokenService](i)
+	if err != nil {
+		return nil, err
+	}
+
+	logoutService, err := di.Invoke[services.LogoutService](i)
 	if err != nil {
 		return nil, err
 	}
@@ -34,6 +40,7 @@ func NewAuthMiddleware(i *di.Injector) (AuthMiddleware, error) {
 	return &authMiddleware{
 		i:  i,
 		ts: tokenService,
+		ls: logoutService,
 		rc: requestContext,
 	}, nil
 }
@@ -56,6 +63,17 @@ func (a *authMiddleware) Authenticate(next http.Handler) http.Handler {
 
 		userID, err := a.ts.ValidateToken(r.Context(), token)
 		if err != nil {
+			responses.NoContent(w, http.StatusUnauthorized)
+			return
+		}
+
+		logout, err := a.ls.IsLogoutRegistered(r.Context(), token)
+		if err != nil {
+			responses.NoContent(w, http.StatusInternalServerError)
+			return
+		}
+
+		if logout {
 			responses.NoContent(w, http.StatusUnauthorized)
 			return
 		}
