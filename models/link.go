@@ -13,6 +13,7 @@ var (
 	ErrLinkNotFound            = errors.New("link not found")
 	ErrInvalidShortCode        = errors.New("invalid short code")
 	ErrCustomCodeAlreadyExists = errors.New("custom code already exists")
+	ErrLinkNotBelongToUser     = errors.New("link does not belong to user")
 )
 
 type Link struct {

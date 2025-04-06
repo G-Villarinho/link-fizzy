@@ -7,6 +7,7 @@ require github.com/samber/do v1.6.0
 require (
 	github.com/go-sql-driver/mysql v1.9.1
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/mux v1.8.1
 	github.com/joho/godotenv v1.5.1
 	github.com/json-iterator/go v1.1.12
 	github.com/stretchr/testify v1.9.0

@@ -12,12 +12,15 @@ import (
 	"github.com/g-villarinho/link-fizz-api/responses"
 	"github.com/g-villarinho/link-fizz-api/services"
 	jsoniter "github.com/json-iterator/go"
+
+	"github.com/gorilla/mux"
 )
 
 type LinkHandler interface {
 	CreateLink(w http.ResponseWriter, r *http.Request)
 	RedirectLink(w http.ResponseWriter, r *http.Request)
 	GetLinks(w http.ResponseWriter, r *http.Request)
+	GetLinkDetails(w http.ResponseWriter, r *http.Request)
 }
 
 type linkHandler struct {
@@ -151,6 +154,51 @@ func (l *linkHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	response, err := l.ls.GetLinksByUserID(r.Context(), userID)
 	if err != nil {
 		logger.Error("get links by user ID", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	responses.JSON(w, http.StatusOK, response)
+}
+
+func (l *linkHandler) GetLinkDetails(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		"handler", "link",
+		"method", "GetLinkDetails",
+	)
+
+	params := mux.Vars(r)
+	shortCode := params["shortCode"]
+	if shortCode == "" {
+		logger.Error("empty short code")
+		responses.NoContent(w, http.StatusBadRequest)
+		return
+	}
+
+	logger.Debug("short code", slog.String("shortCode", shortCode))
+
+	userID, found := l.rc.GetUserID(r.Context())
+	if !found {
+		logger.Error("user ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	response, err := l.ls.GetLinkDetails(r.Context(), userID, shortCode)
+	if err != nil {
+		if err == models.ErrLinkNotFound {
+			logger.Error("link not found")
+			responses.NoContent(w, http.StatusNotFound)
+			return
+		}
+
+		if err == models.ErrLinkNotBelongToUser {
+			logger.Error("link does not belong to user")
+			responses.NoContent(w, http.StatusForbidden)
+			return
+		}
+
+		logger.Error("get link details", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
 		return
 	}

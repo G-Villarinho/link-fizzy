@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"log"
-	"net/http"
 
 	"github.com/g-villarinho/link-fizz-api/handlers"
 	"github.com/g-villarinho/link-fizz-api/handlers/middlewares"
@@ -16,8 +15,6 @@ import (
 )
 
 func initDeps(i *di.Injector) *sql.DB {
-
-	// Databases
 	db, err := storages.InitDB()
 	if err != nil {
 		log.Fatal("failed to initialize database:", err)
@@ -59,69 +56,4 @@ func initDeps(i *di.Injector) *sql.DB {
 	di.Provide(i, repositories.NewSessionRepository)
 
 	return db
-}
-
-func setupRoutes(i *di.Injector) http.Handler {
-	mux := http.NewServeMux()
-
-	setupLinkRoutes(mux, i)
-	setupUserRoutes(mux, i)
-	setupAuthRoutes(mux, i)
-
-	return middlewares.Cors(mux)
-}
-
-func setupLinkRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
-	linkHandler, err := di.Invoke[handlers.LinkHandler](i)
-	if err != nil {
-		log.Fatal("failed to invoke link handler:", err)
-	}
-
-	authMiddleware, err := di.Invoke[middlewares.AuthMiddleware](i)
-	if err != nil {
-		log.Fatal("failed to invoke auth middleware:", err)
-	}
-
-	mux.Handle("POST /links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.CreateLink)))
-	mux.HandleFunc("GET /{shortCode}", linkHandler.RedirectLink)
-	mux.Handle("GET /me/links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.GetLinks)))
-
-	return mux
-}
-
-func setupUserRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
-	userHandler, err := di.Invoke[handlers.UserHandler](i)
-	if err != nil {
-		log.Fatal("failed to invoke user handler:", err)
-	}
-
-	authMiddleware, err := di.Invoke[middlewares.AuthMiddleware](i)
-	if err != nil {
-		log.Fatal("failed to invoke auth middleware:", err)
-	}
-
-	mux.Handle("GET /me", authMiddleware.Authenticate(http.HandlerFunc(userHandler.GetProfile)))
-	mux.Handle("PUT /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.UpdateUser)))
-	mux.Handle("DELETE /users", authMiddleware.Authenticate(http.HandlerFunc(userHandler.DeleteUser)))
-
-	return mux
-}
-
-func setupAuthRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
-	authHandler, err := di.Invoke[handlers.AuthHandler](i)
-	if err != nil {
-		log.Fatal("failed to invoke auth handler:", err)
-	}
-
-	authMiddleware, err := di.Invoke[middlewares.AuthMiddleware](i)
-	if err != nil {
-		log.Fatal("failed to invoke auth middleware:", err)
-	}
-
-	mux.HandleFunc("POST /register", authHandler.Register)
-	mux.HandleFunc("POST /login", authHandler.Login)
-
-	mux.Handle("POST /logout", authMiddleware.Authenticate(http.HandlerFunc(authHandler.Logout)))
-
-	return mux
 }

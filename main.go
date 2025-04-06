@@ -12,6 +12,7 @@ import (
 
 	"github.com/g-villarinho/link-fizz-api/config"
 	"github.com/g-villarinho/link-fizz-api/pkgs/di"
+	"github.com/g-villarinho/link-fizz-api/router"
 )
 
 func main() {
@@ -23,7 +24,7 @@ func main() {
 
 	db := initDeps(i)
 
-	mux := setupRoutes(i)
+	mux := router.SetupRoutes(i)
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%s", config.Env.APIPort),
 		Handler: mux,
