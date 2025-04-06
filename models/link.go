@@ -27,3 +27,7 @@ type LinkPayload struct {
 	DestinationURL string  `json:"destination_url"`
 	CustomCode     *string `json:"custom_code,omitempty"`
 }
+
+type CreateLinkResponse struct {
+	ShortCode string `json:"shortCode"`
+}

@@ -41,7 +41,7 @@ func (l *linkRepository) CreateLink(ctx context.Context, link models.Link) error
 	}
 	defer statement.Close()
 
-	_, err = statement.ExecContext(ctx, link.ID, link.OriginalURL, link.UserID, link.ShortCode, link.CreatedAt)
+	_, err = statement.ExecContext(ctx, link.ID, link.Title, link.OriginalURL, link.UserID, link.ShortCode, link.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("execute insert: %w", err)
 	}

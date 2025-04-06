@@ -17,7 +17,7 @@ import (
 const shortCodeLength = 8
 
 type LinkService interface {
-	CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) error
+	CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) (*models.CreateLinkResponse, error)
 	GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error)
 	GetUsersShortURLs(ctx context.Context, userID string) ([]string, error)
 	GetLinkByShortCode(ctx context.Context, shortCode string) (*models.Link, error)
@@ -47,26 +47,27 @@ func NewLinkService(i *di.Injector) (LinkService, error) {
 	}, nil
 }
 
-func (l *linkService) CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) error {
+func (l *linkService) CreateLink(ctx context.Context, userID, destinationURL string, title, customCode *string) (*models.CreateLinkResponse, error) {
 	var shortCode string
 
 	if customCode != nil && *customCode != "" {
 		cleanCode := strings.ReplaceAll(*customCode, " ", "")
+		cleanCode = strings.ToLower(cleanCode)
 
 		linkFromCode, err := l.lr.GetLinkByShortCode(ctx, cleanCode)
 		if err != nil {
-			return fmt.Errorf("get link by short code: %w", err)
+			return nil, fmt.Errorf("get link by short code: %w", err)
 		}
 
 		if linkFromCode != nil {
-			return models.ErrCustomCodeAlreadyExists
+			return nil, models.ErrCustomCodeAlreadyExists
 		}
 
 		shortCode = cleanCode
 	} else {
 		generatedCode, err := l.us.GenerateShortCode(shortCodeLength)
 		if err != nil {
-			return fmt.Errorf("generate short code: %w", err)
+			return nil, fmt.Errorf("generate short code: %w", err)
 		}
 
 		shortCode = generatedCode
@@ -74,7 +75,7 @@ func (l *linkService) CreateLink(ctx context.Context, userID, destinationURL str
 
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return fmt.Errorf("generate UUID: %w", err)
+		return nil, fmt.Errorf("generate UUID: %w", err)
 	}
 
 	link := models.Link{
@@ -87,10 +88,12 @@ func (l *linkService) CreateLink(ctx context.Context, userID, destinationURL str
 	}
 
 	if err := l.lr.CreateLink(ctx, link); err != nil {
-		return fmt.Errorf("create link: %w", err)
+		return nil, fmt.Errorf("create link: %w", err)
 	}
 
-	return nil
+	return &models.CreateLinkResponse{
+		ShortCode: shortCode,
+	}, nil
 }
 
 func (l *linkService) GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error) {

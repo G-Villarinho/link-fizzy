@@ -83,13 +83,20 @@ func (l *linkHandler) CreateLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := l.ls.CreateLink(r.Context(), userID, payload.DestinationURL, payload.Title, payload.CustomCode); err != nil {
+	response, err := l.ls.CreateLink(r.Context(), userID, payload.DestinationURL, payload.Title, payload.CustomCode)
+	if err != nil {
+		if err == models.ErrCustomCodeAlreadyExists {
+			logger.Error("custom code already exists")
+			responses.NoContent(w, http.StatusConflict)
+			return
+		}
+
 		logger.Error("create link", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
 		return
 	}
 
-	responses.NoContent(w, http.StatusCreated)
+	responses.JSON(w, http.StatusCreated, response)
 }
 
 func (l *linkHandler) RedirectLink(w http.ResponseWriter, r *http.Request) {
