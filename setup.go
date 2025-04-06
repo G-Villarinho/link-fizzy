@@ -84,7 +84,7 @@ func setupLinkRoutes(mux *http.ServeMux, i *di.Injector) *http.ServeMux {
 
 	mux.Handle("POST /links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.CreateLink)))
 	mux.HandleFunc("GET /{shortCode}", linkHandler.RedirectLink)
-	mux.Handle("GET /me/links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.GetShortURLs)))
+	mux.Handle("GET /me/links", authMiddleware.Authenticate(http.HandlerFunc(linkHandler.GetLinks)))
 
 	return mux
 }

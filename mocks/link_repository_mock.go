@@ -246,6 +246,65 @@ func (_c *LinkRepositoryMock_GetLinkByShortCode_Call) RunAndReturn(run func(cont
 	return _c
 }
 
+// GetLinksByUserID provides a mock function with given fields: ctx, userID
+func (_m *LinkRepositoryMock) GetLinksByUserID(ctx context.Context, userID string) ([]models.Link, error) {
+	ret := _m.Called(ctx, userID)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetLinksByUserID")
+	}
+
+	var r0 []models.Link
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) ([]models.Link, error)); ok {
+		return rf(ctx, userID)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) []models.Link); ok {
+		r0 = rf(ctx, userID)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]models.Link)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// LinkRepositoryMock_GetLinksByUserID_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetLinksByUserID'
+type LinkRepositoryMock_GetLinksByUserID_Call struct {
+	*mock.Call
+}
+
+// GetLinksByUserID is a helper method to define mock.On call
+//   - ctx context.Context
+//   - userID string
+func (_e *LinkRepositoryMock_Expecter) GetLinksByUserID(ctx interface{}, userID interface{}) *LinkRepositoryMock_GetLinksByUserID_Call {
+	return &LinkRepositoryMock_GetLinksByUserID_Call{Call: _e.mock.On("GetLinksByUserID", ctx, userID)}
+}
+
+func (_c *LinkRepositoryMock_GetLinksByUserID_Call) Run(run func(ctx context.Context, userID string)) *LinkRepositoryMock_GetLinksByUserID_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *LinkRepositoryMock_GetLinksByUserID_Call) Return(_a0 []models.Link, _a1 error) *LinkRepositoryMock_GetLinksByUserID_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *LinkRepositoryMock_GetLinksByUserID_Call) RunAndReturn(run func(context.Context, string) ([]models.Link, error)) *LinkRepositoryMock_GetLinksByUserID_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetOriginalURLByShortCode provides a mock function with given fields: ctx, shortCode
 func (_m *LinkRepositoryMock) GetOriginalURLByShortCode(ctx context.Context, shortCode string) (string, error) {
 	ret := _m.Called(ctx, shortCode)

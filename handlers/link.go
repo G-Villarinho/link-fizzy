@@ -17,7 +17,7 @@ import (
 type LinkHandler interface {
 	CreateLink(w http.ResponseWriter, r *http.Request)
 	RedirectLink(w http.ResponseWriter, r *http.Request)
-	GetShortURLs(w http.ResponseWriter, r *http.Request)
+	GetLinks(w http.ResponseWriter, r *http.Request)
 }
 
 type linkHandler struct {
@@ -135,10 +135,10 @@ func (l *linkHandler) RedirectLink(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, originalURL, http.StatusFound)
 }
 
-func (l *linkHandler) GetShortURLs(w http.ResponseWriter, r *http.Request) {
+func (l *linkHandler) GetLinks(w http.ResponseWriter, r *http.Request) {
 	logger := slog.With(
 		"handler", "link",
-		"method", "GetShortURLs",
+		"method", "GetLinksByUserID",
 	)
 
 	userID, found := l.rc.GetUserID(r.Context())
@@ -148,12 +148,12 @@ func (l *linkHandler) GetShortURLs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shortURLs, err := l.ls.GetUsersShortURLs(r.Context(), userID)
+	response, err := l.ls.GetLinksByUserID(r.Context(), userID)
 	if err != nil {
-		logger.Error("get short URLs", slog.String("error", err.Error()))
+		logger.Error("get links by user ID", slog.String("error", err.Error()))
 		responses.NoContent(w, http.StatusInternalServerError)
 		return
 	}
 
-	responses.JSON(w, http.StatusOK, shortURLs)
+	responses.JSON(w, http.StatusOK, response)
 }

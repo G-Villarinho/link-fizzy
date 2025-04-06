@@ -30,7 +30,7 @@ func TestCreateLink(t *testing.T) {
 		mockUtils.On("GenerateShortCode", shortCodeLength).Return(expectedShortCode, nil)
 		mockRepo.On("CreateLink", mock.Anything, mock.Anything).Return(nil)
 
-		err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
+		_, err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
 
 		assert.NoError(t, err)
 		mockUtils.AssertExpectations(t)
@@ -49,7 +49,7 @@ func TestCreateLink(t *testing.T) {
 		ctx := context.Background()
 		mockUtils.On("GenerateShortCode", shortCodeLength).Return("", errors.New("failed to generate short code"))
 		userID := uuid.New().String()
-		err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
+		_, err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
 
 		assert.Error(t, err)
 		assert.Equal(t, "generate short code: failed to generate short code", err.Error())
@@ -72,7 +72,7 @@ func TestCreateLink(t *testing.T) {
 		mockRepo.On("CreateLink", mock.Anything, mock.Anything).Return(errors.New("repository error"))
 
 		userID := uuid.New().String()
-		err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
+		_, err := service.CreateLink(ctx, userID, "https://example.com", nil, nil)
 
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "create link: repository error")
