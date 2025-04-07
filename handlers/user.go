@@ -17,6 +17,7 @@ type UserHandler interface {
 	GetProfile(w http.ResponseWriter, r *http.Request)
 	UpdateUser(w http.ResponseWriter, r *http.Request)
 	DeleteUser(w http.ResponseWriter, r *http.Request)
+	UpdatePassword(w http.ResponseWriter, r *http.Request)
 }
 
 type userHandler struct {
@@ -110,4 +111,46 @@ func (u *userHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 func (u *userHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	panic("unimplemented")
+}
+
+func (u *userHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	logger := slog.With(
+		"handler", "user",
+		"method", "UpdatePassword",
+	)
+
+	var payload models.UpdatePasswordPayload
+	if err := jsoniter.NewDecoder(r.Body).Decode(&payload); err != nil {
+		logger.Error("decode payload", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	userID, found := u.rc.GetUserID(r.Context())
+	if !found {
+		logger.Error("user ID not found in context")
+		responses.NoContent(w, http.StatusUnauthorized)
+		return
+	}
+
+	if err := u.ur.UpdatePassword(r.Context(), userID, payload.CurrentPassword, payload.NewPassword); err != nil {
+		if err == models.ErrUserNotFound {
+			logger.Error("user not found", slog.String("error", err.Error()))
+			responses.NoContent(w, http.StatusUnauthorized)
+			return
+		}
+
+		if err == models.ErrInvalidCredentials {
+			logger.Error("invalid credentials", slog.String("error", err.Error()))
+			responses.NoContent(w, http.StatusUnauthorized)
+			return
+		}
+
+		logger.Error("update password", slog.String("error", err.Error()))
+		responses.NoContent(w, http.StatusInternalServerError)
+		return
+	}
+
+	responses.NoContent(w, http.StatusNoContent)
 }

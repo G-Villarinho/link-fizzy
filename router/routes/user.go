@@ -33,5 +33,11 @@ func GetUserRoutes(i *di.Injector) []Route {
 			Handler:        userHandler.DeleteUser,
 			AllowAnonymous: false,
 		},
+		{
+			Method:         http.MethodPatch,
+			Path:           "/users/password",
+			Handler:        userHandler.UpdatePassword,
+			AllowAnonymous: false,
+		},
 	}
 }

@@ -31,6 +31,12 @@ type UpdateUserPayload struct {
 	Email string `json:"email"`
 }
 
+type UpdatePasswordPayload struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPasword"`
+	ConfirmPassword string `json:"confirmPassword"`
+}
+
 type UserResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`

@@ -10,6 +10,10 @@ import (
 	"github.com/g-villarinho/link-fizz-api/services"
 )
 
+type errorResponse struct {
+	Code string `json:"code"`
+}
+
 type AuthMiddleware interface {
 	Authenticate(next http.Handler) http.Handler
 }
@@ -49,13 +53,17 @@ func (a *authMiddleware) Authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			responses.NoContent(w, http.StatusUnauthorized)
+			responses.JSON(w, http.StatusUnauthorized, errorResponse{
+				Code: "UNAUTHORIZED",
+			})
 			return
 		}
 
 		parts := strings.Split(authHeader, " ")
 		if len(parts) != 2 || parts[0] != "Bearer" {
-			responses.NoContent(w, http.StatusUnauthorized)
+			responses.JSON(w, http.StatusUnauthorized, errorResponse{
+				Code: "UNAUTHORIZED",
+			})
 			return
 		}
 
@@ -69,12 +77,16 @@ func (a *authMiddleware) Authenticate(next http.Handler) http.Handler {
 
 		logout, err := a.ls.IsLogoutRegistered(r.Context(), token)
 		if err != nil {
-			responses.NoContent(w, http.StatusInternalServerError)
+			responses.JSON(w, http.StatusUnauthorized, errorResponse{
+				Code: "UNAUTHORIZED",
+			})
 			return
 		}
 
 		if logout {
-			responses.NoContent(w, http.StatusUnauthorized)
+			responses.JSON(w, http.StatusUnauthorized, errorResponse{
+				Code: "UNAUTHORIZED",
+			})
 			return
 		}
 

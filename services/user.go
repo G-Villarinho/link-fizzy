@@ -17,6 +17,7 @@ type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	UpdateUser(ctx context.Context, ID string, name, email string) error
 	DeleteUser(ctx context.Context, ID, token string) error
+	UpdatePassword(ctx context.Context, userID, currentPassword, newPassword string) error
 }
 
 type userService struct {
@@ -144,6 +145,34 @@ func (u *userService) DeleteUser(ctx context.Context, ID, token string) error {
 
 	if err := u.ls.CreateLogout(ctx, nil, token); err != nil {
 		return fmt.Errorf("create logout: %w", err)
+	}
+
+	return nil
+}
+
+func (u *userService) UpdatePassword(ctx context.Context, userID string, currentPassword string, newPassword string) error {
+	user, err := u.ur.GetUserByID(ctx, userID)
+	if err != nil {
+		return fmt.Errorf("get user by ID %s: %w", userID, err)
+	}
+
+	if user == nil {
+		return models.ErrUserNotFound
+	}
+
+	if err := u.ss.VerifyPassword(ctx, user.PasswordHash, currentPassword); err != nil {
+		return models.ErrInvalidCredentials
+	}
+
+	passwordHash, err := u.ss.HashPassword(ctx, newPassword)
+	if err != nil {
+		return fmt.Errorf("hash password: %w", err)
+	}
+
+	user.PasswordHash = passwordHash
+
+	if err := u.ur.UpdateUser(ctx, user); err != nil {
+		return fmt.Errorf("update user: %w", err)
 	}
 
 	return nil

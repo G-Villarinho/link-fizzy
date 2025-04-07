@@ -9,7 +9,7 @@ var allowedOrigins = map[string]bool{
 	"http://localhost:3000": true,
 	"http://localhost:5173": true}
 
-var allowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+var allowedMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"}
 var allowedHeaders = []string{"Content-Type", "Authorization", "X-Requested-With"}
 var exposedHeaders = []string{"Content-Length", "X-Kuma-Revision"}
 
